@@ -72,6 +72,16 @@ describe("npm files", () => {
     });
   });
 
+  describe("getFile and listFiles consistency", () => {
+    it("produces identical integrity and size via buffered and streaming modes", async () => {
+      let file = (await getFile(publicNpmRegistry, "react", "18.2.0", "/package.json")) as PackageFile;
+      let files = await listFiles(publicNpmRegistry, "react", "18.2.0", "/package.json");
+      expect(files.length).toBe(1);
+      expect(files[0].integrity).toBe(file.integrity);
+      expect(files[0].size).toBe(file.size);
+    });
+  });
+
   describe("listFiles", () => {
     it("lists files in @ffmpeg/core-0.12.6.tgz", async () => {
       let files = await listFiles(publicNpmRegistry, "@ffmpeg/core", "0.12.6");
