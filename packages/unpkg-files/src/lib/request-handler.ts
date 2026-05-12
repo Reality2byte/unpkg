@@ -2,7 +2,12 @@ import * as semver from "semver";
 import type { PackageFileListing } from "unpkg-worker";
 
 import { env } from "./env.ts";
-import { getFile, listFiles, PackageNotFoundError } from "./npm-files.ts";
+import {
+  getFile,
+  listFiles,
+  PackageNotFoundError,
+  TarballFetchTimeoutError,
+} from "./npm-files.ts";
 import { logRequest } from "./request-logging.ts";
 
 const publicNpmRegistry = "https://registry.npmjs.org";
@@ -121,6 +126,11 @@ async function handleRequest_(request: Request): Promise<Response> {
   } catch (error) {
     if (error instanceof PackageNotFoundError) {
       return notFound(`Package not found: ${error.packageName}@${error.version}`);
+    }
+    if (error instanceof TarballFetchTimeoutError) {
+      return new Response(`Timed out fetching package: ${error.packageName}@${error.version}`, {
+        status: 504,
+      });
     }
 
     throw error;
