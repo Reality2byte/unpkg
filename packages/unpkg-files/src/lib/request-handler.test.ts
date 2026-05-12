@@ -33,6 +33,8 @@ describe("handleRequest", () => {
           return fileResponse(packageTarballs.react["18.2.0"]);
         case "https://registry.npmjs.org/missing-package/-/missing-package-0.0.0.tgz":
           return new Response("Not Found", { status: 404 });
+        case "https://registry.npmjs.org/timeout-package/-/timeout-package-0.0.0.tgz":
+          throw new DOMException("The operation timed out.", "TimeoutError");
         default:
           throw new Error(`Unexpected URL: ${url}`);
       }
@@ -91,6 +93,13 @@ describe("handleRequest", () => {
     it("returns 404 for a missing package", async () => {
       let response = await dispatchFetch("https://files.unpkg.com/file/missing-package@0.0.0/package.json");
       expect(response.status).toBe(404);
+    });
+
+    it("returns 504 when fetching a package times out", async () => {
+      let response = await dispatchFetch(
+        "https://files.unpkg.com/file/timeout-package@0.0.0/package.json"
+      );
+      expect(response.status).toBe(504);
     });
 
     it("returns 404 for a missing file", async () => {

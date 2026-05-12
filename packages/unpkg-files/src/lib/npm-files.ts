@@ -5,7 +5,9 @@ import tar from "tar-stream";
 import type { PackageFile, PackageFileMetadata } from "unpkg-worker";
 
 import { getContentType } from "./content-type.ts";
-import { getSubresourceIntegrity } from "./subresource-integrity.ts";
+import { SubresourceIntegrityHasher } from "./subresource-integrity.ts";
+
+const TARBALL_FETCH_TIMEOUT_MS = 30_000;
 
 export async function getFile(
   registry: string,
@@ -15,22 +17,20 @@ export async function getFile(
 ): Promise<PackageFile | null> {
   let file: PackageFile | null = null;
 
-  await fetchAndParsePackage(
-    registry,
-    packageName,
-    version,
-    (path, content) => {
+  await fetchAndParsePackage(registry, packageName, version, {
+    buffer: true,
+    handler: (path, content, integrity, size, header) => {
       file = {
         path,
-        body: content,
-        size: content.length,
+        body: content!,
+        size,
         type: getContentType(path),
-        integrity: getSubresourceIntegrity(content),
+        integrity,
       };
       return true; // signal early exit
     },
-    (name) => name.toLowerCase() === filename.toLowerCase(),
-  );
+    filter: (name) => name.toLowerCase() === filename.toLowerCase(),
+  });
 
   return file;
 }
@@ -43,20 +43,17 @@ export async function listFiles(
 ): Promise<PackageFileMetadata[]> {
   let files: PackageFileMetadata[] = [];
 
-  await fetchAndParsePackage(
-    registry,
-    packageName,
-    version,
-    (path, content) => {
+  await fetchAndParsePackage(registry, packageName, version, {
+    handler: (path, _content, integrity, size) => {
       files.push({
         path,
-        size: content.length,
+        size,
         type: getContentType(path),
-        integrity: getSubresourceIntegrity(content),
+        integrity,
       });
     },
-    (name) => !name.endsWith("/") && name.startsWith(prefix),
-  );
+    filter: (name) => !name.endsWith("/") && name.startsWith(prefix),
+  });
 
   return files;
 }
@@ -75,16 +72,60 @@ export class PackageNotFoundError extends Error {
   }
 }
 
+export class TarballFetchTimeoutError extends Error {
+  registry: string;
+  packageName: string;
+  version: string;
+  timeoutMs: number;
+
+  constructor(
+    message: string,
+    registry: string,
+    packageName: string,
+    version: string,
+    timeoutMs: number
+  ) {
+    super(message);
+    this.name = "TarballFetchTimeoutError";
+    this.registry = registry;
+    this.packageName = packageName;
+    this.version = version;
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+interface EntryHandlerOptions {
+  buffer?: boolean;
+  handler: (name: string, content: Uint8Array | null, integrity: string, size: number, header: tar.Headers) => boolean | void;
+  filter?: (name: string, header: tar.Headers) => boolean;
+}
+
 async function fetchAndParsePackage(
   registry: string,
   packageName: string,
   version: string,
-  handler: (name: string, content: Uint8Array, header: tar.Headers) => boolean | void,
-  filter?: (name: string, header: tar.Headers) => boolean,
+  options: EntryHandlerOptions,
 ): Promise<void> {
   let tarballUrl = createTarballUrl(registry, packageName, version);
+  // Keep tarball work within the upstream request budget.
+  let signal = AbortSignal.timeout(TARBALL_FETCH_TIMEOUT_MS);
 
-  let response = await fetch(tarballUrl);
+  let response: Response;
+  try {
+    response = await fetch(tarballUrl, { signal });
+  } catch (error) {
+    if (isTimeoutError(error, signal)) {
+      throw new TarballFetchTimeoutError(
+        `Timed out fetching tarball: ${packageName}@${version}`,
+        registry,
+        packageName,
+        version,
+        TARBALL_FETCH_TIMEOUT_MS
+      );
+    }
+
+    throw error;
+  }
   if (!response.ok || !response.body) {
     if (response.status === 404) {
       throw new PackageNotFoundError(`Package not found: ${packageName}`, registry, packageName, version);
@@ -114,25 +155,38 @@ async function fetchAndParsePackage(
   };
 
   return new Promise((resolve, reject) => {
-    extract.on("error", (error) => {
-      if (settled) return;
+    const rejectWithCleanup = (error: unknown) => {
       settled = true;
       cleanup();
-      reject(error);
+
+      if (isTimeoutError(error, signal)) {
+        reject(
+          new TarballFetchTimeoutError(
+            `Timed out fetching tarball: ${packageName}@${version}`,
+            registry,
+            packageName,
+            version,
+            TARBALL_FETCH_TIMEOUT_MS
+          )
+        );
+      } else {
+        reject(error);
+      }
+    };
+
+    extract.on("error", (error) => {
+      if (settled) return;
+      rejectWithCleanup(error);
     });
 
     gunzip.on("error", (error) => {
       if (settled) return;
-      settled = true;
-      cleanup();
-      reject(error);
+      rejectWithCleanup(error);
     });
 
     tarball.on("error", (error) => {
       if (settled) return;
-      settled = true;
-      cleanup();
-      reject(error);
+      rejectWithCleanup(error);
     });
 
     extract.on("finish", () => {
@@ -146,30 +200,38 @@ async function fetchAndParsePackage(
       // similar. Strip it off to get the actual file path.
       let name = header.name.replace(/^[^\/]+\//, "/");
 
-      if (header.type === "directory" || (filter && !filter(name, header))) {
+      if (header.type === "directory" || (options.filter && !options.filter(name, header))) {
         stream.resume();
         return next();
       }
 
-      let chunks: Buffer[] = [];
+      let hasher = new SubresourceIntegrityHasher();
+      let chunks: Buffer[] | null = options.buffer ? [] : null;
+      let size = 0;
 
       stream.on("error", (error) => {
         if (settled) return;
-        settled = true;
-        cleanup();
-        reject(error);
+        if (!stream.destroyed) stream.destroy();
+        rejectWithCleanup(error);
       });
 
-      stream.on("data", (chunk) => {
-        chunks.push(chunk);
+      stream.on("data", (chunk: Buffer) => {
+        size += chunk.length;
+        hasher.update(chunk);
+        if (chunks) chunks.push(chunk);
       });
 
       stream.on("end", () => {
         if (settled) return;
         try {
-          let done = handler(name, Buffer.concat(chunks), header);
+          let content = chunks
+            ? chunks.length === 1 ? chunks[0] : Buffer.concat(chunks)
+            : null;
+          let integrity = hasher.digest();
+          let done = options.handler(name, content, integrity, size, header);
           if (done) {
             settled = true;
+            if (!stream.destroyed) stream.destroy();
             cleanup();
             resolve();
           } else {
@@ -177,6 +239,7 @@ async function fetchAndParsePackage(
           }
         } catch (error) {
           settled = true;
+          if (!stream.destroyed) stream.destroy();
           cleanup();
           reject(error);
         }
@@ -190,4 +253,11 @@ async function fetchAndParsePackage(
 function createTarballUrl(registry: string, packageName: string, version: string): URL {
   let basename = packageName.split("/").pop()!.toLowerCase();
   return new URL(`/${packageName.toLowerCase()}/-/${basename}-${version}.tgz`, registry);
+}
+
+function isTimeoutError(error: unknown, signal: AbortSignal): boolean {
+  return (
+    error instanceof Error &&
+    (error.name === "TimeoutError" || (signal.aborted && error.name === "AbortError"))
+  );
 }
