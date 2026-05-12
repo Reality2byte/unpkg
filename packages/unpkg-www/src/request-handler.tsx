@@ -1,14 +1,17 @@
 import type { VNode } from "preact";
 import { render } from "preact-render-to-string";
 import {
+  getEsmPackageSubpath,
   fetchFile,
   getPackageInfo,
   listFiles,
+  normalizeEsmRequestUrl,
   parsePackagePathname,
   resolvePackageExport,
   resolvePackageVersion,
   rewriteImports,
 } from "unpkg-worker";
+import type { EsmRequestError, PackageJson } from "unpkg-worker";
 
 import { AssetsContext } from "./assets-context.ts";
 import { loadAssetsManifest } from "./assets-manifest.ts";
@@ -40,6 +43,11 @@ export async function handleRequest(request: Request, env: Env, context: Executi
   if (url.pathname === "/_health") {
     return new Response("OK");
   }
+
+  if (url.hostname === "esm.unpkg.com") {
+    return handleEsmRequest(request, env, context);
+  }
+
   if (url.pathname === "/favicon.ico") {
     return notFound();
   }
@@ -266,6 +274,186 @@ export async function handleRequest(request: Request, env: Env, context: Executi
   }
 
   return notFound(`Not found: ${url.pathname}${url.search}`);
+}
+
+async function handleEsmRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
+  let originalUrl = new URL(request.url);
+  let normalized = normalizeEsmRequestUrl(request.url);
+  if ("code" in normalized) {
+    return esmError(normalized);
+  }
+
+  let packagePath = normalized.packagePath;
+  let packageName = packagePath.package.toLowerCase();
+  let packageInfo = await getPackageInfo(context, publicNpmRegistry, packageName);
+  if (packageInfo == null) {
+    return esmError({
+      code: "PACKAGE_NOT_FOUND",
+      message: `Package not found: ${packagePath.package}`,
+      status: 404,
+    });
+  }
+
+  let version = resolvePackageVersion(packageInfo, packagePath.version ?? "latest");
+  if (version == null || packageInfo.versions == null || packageInfo.versions[version] == null) {
+    return esmError({
+      code: "PACKAGE_VERSION_NOT_FOUND",
+      message: `Package version not found: ${packageName}@${packagePath.version ?? "latest"}`,
+      status: 404,
+    });
+  }
+
+  let searchParams = new URLSearchParams(normalized.searchParams);
+  if (packagePath.externalAll && !searchParams.has("external")) {
+    searchParams.set("external", "*");
+  }
+
+  let search = normalizeEsmSearch(searchParams);
+  let pathname = `/${packageName}@${version}${packagePath.filename ?? ""}`;
+  let shouldRedirect =
+    packagePath.externalAll ||
+    packageName !== packagePath.package ||
+    packagePath.version !== version ||
+    originalUrl.pathname !== normalized.url.pathname ||
+    originalUrl.search !== normalized.url.search ||
+    normalized.url.pathname !== pathname ||
+    normalized.url.search !== search;
+
+  if (shouldRedirect) {
+    return redirect(`${pathname}${search}`, {
+      status: packagePath.version === version ? 301 : 302,
+      headers: esmCorsHeaders({
+        "Cache-Control": "public, max-age=60, s-maxage=300",
+      }),
+    });
+  }
+
+  let packageJson = packageInfo.versions[version];
+
+  if (searchParams.has("meta")) {
+    return Response.json(createEsmMetadata(normalized.url.origin, packageName, version, packagePath.filename, packageJson, searchParams), {
+      headers: esmCorsHeaders({
+        "Cache-Control": "public, max-age=60, s-maxage=300",
+        "Content-Type": "application/json",
+      }),
+    });
+  }
+
+  return esmError({
+    code: "BUILD_NOT_IMPLEMENTED",
+    message: "ESM build artifacts are not implemented yet. Phase 1 only resolves URLs and serves metadata.",
+    status: 501,
+  });
+}
+
+interface EsmMetadata {
+  build: {
+    bundle: string;
+    minify: boolean;
+    sourcemap: boolean;
+  };
+  dependencies: Record<string, string>;
+  exports: string[];
+  integrity: null;
+  module: string;
+  name: string;
+  peerDependencies: Record<string, string>;
+  specifier: string;
+  subpath: string;
+  target: string;
+  types: string | null;
+  version: string;
+}
+
+function createEsmMetadata(
+  origin: string,
+  packageName: string,
+  version: string,
+  filename: string | undefined,
+  packageJson: PackageJson,
+  searchParams: URLSearchParams
+): EsmMetadata {
+  let subpath = getEsmPackageSubpath(filename);
+  let target = searchParams.get("target") ?? "es2022";
+  let artifactSearchParams = new URLSearchParams(searchParams);
+  artifactSearchParams.delete("meta");
+  let artifactSearch = normalizeEsmSearch(artifactSearchParams);
+  let modulePath = `/${packageName}@${version}${filename ?? ""}${artifactSearch}`;
+  let types = packageJson.types ?? packageJson.typings ?? null;
+
+  return {
+    name: packageName,
+    version,
+    specifier: `${packageName}@${version}`,
+    subpath,
+    target,
+    module: new URL(modulePath, origin).toString(),
+    types: types == null ? null : new URL(`/${packageName}@${version}/${types.replace(/^\.?\/*/, "")}`, origin).toString(),
+    integrity: null,
+    dependencies: packageJson.dependencies ?? {},
+    peerDependencies: packageJson.peerDependencies ?? {},
+    exports: listEsmExportSubpaths(packageJson),
+    build: {
+      bundle: searchParams.has("standalone") ? "standalone" : searchParams.has("bundle") ? "bundle" : "smart",
+      minify: searchParams.has("min"),
+      sourcemap: searchParams.has("sourcemap"),
+    },
+  };
+}
+
+function listEsmExportSubpaths(packageJson: PackageJson): string[] {
+  if (typeof packageJson.exports !== "object" || packageJson.exports == null) {
+    return [];
+  }
+
+  return Object.keys(packageJson.exports).filter((key) => key.startsWith("."));
+}
+
+function normalizeEsmSearch(searchParams: URLSearchParams): string {
+  let entries = Array.from(searchParams.entries()).sort(([leftName, leftValue], [rightName, rightValue]) => {
+    if (leftName === rightName) {
+      return leftValue.localeCompare(rightValue);
+    }
+
+    return leftName.localeCompare(rightName);
+  });
+  let normalized = new URLSearchParams();
+
+  for (let [name, value] of entries) {
+    normalized.append(name, value);
+  }
+
+  let search = normalized.toString();
+  return search === "" ? "" : `?${search}`;
+}
+
+function esmError(error: EsmRequestError | { code: string; message: string; status: number }): Response {
+  return Response.json(
+    {
+      error: {
+        code: error.code,
+        message: error.message,
+      },
+    },
+    {
+      status: error.status,
+      headers: esmCorsHeaders({
+        "Cache-Control": "public, max-age=60, s-maxage=300",
+        "Content-Type": "application/json",
+      }),
+    }
+  );
+}
+
+function esmCorsHeaders(headers?: HeadersInit): HeadersInit {
+  return {
+    "Access-Control-Allow-Headers": "*",
+    "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Expose-Headers": "*",
+    "Cross-Origin-Resource-Policy": "cross-origin",
+    ...headers,
+  };
 }
 
 function notFound(message?: string, init?: ResponseInit): Response {

@@ -319,6 +319,68 @@ describe("handleRequest", () => {
     });
   });
 
+  describe("esm.unpkg.com requests", () => {
+    it("resolves semver ranges with a normalized temporary redirect", async () => {
+      let response = await dispatchFetch("https://esm.unpkg.com/react@^18?meta", { redirect: "manual" });
+      expect(response.status).toBe(302);
+      let location = response.headers.get("Location");
+      expect(location).not.toBeNull();
+      expect(location).toMatch(/^\/react@18\.\d+\.\d+\?meta=&target=es2022$/);
+    });
+
+    it("normalizes import-map-friendly path query syntax", async () => {
+      let response = await dispatchFetch("https://esm.unpkg.com/preact@10.26.4&dev/hooks?meta", {
+        redirect: "manual",
+      });
+      expect(response.status).toBe(301);
+      expect(response.headers.get("Location")).toBe("/preact@10.26.4/hooks?dev=&meta=&target=es2022");
+    });
+
+    it("returns build metadata for exact package URLs", async () => {
+      let redirectResponse = await dispatchFetch("https://esm.unpkg.com/react@18.2.0?meta", { redirect: "manual" });
+      expect(redirectResponse.status).toBe(301);
+
+      let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toMatch(/^application\/json/);
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+
+      let json = (await response.json()) as any;
+      expect(json.name).toBe("react");
+      expect(json.version).toBe("18.2.0");
+      expect(json.subpath).toBe(".");
+      expect(json.target).toBe("es2022");
+      expect(json.module).toBe("https://esm.unpkg.com/react@18.2.0?target=es2022");
+      expect(json.types).toBeNull();
+      expect(json.integrity).toBeNull();
+    });
+
+    it("returns JSON diagnostics for invalid query combinations", async () => {
+      let response = await dispatchFetch("https://esm.unpkg.com/react?dev&env=production");
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({
+        error: {
+          code: "INVALID_QUERY",
+          message: "?dev cannot be combined with ?env=production",
+        },
+      });
+    });
+
+    it("returns a phase 1 diagnostic when a build artifact is requested", async () => {
+      let redirectResponse = await dispatchFetch("https://esm.unpkg.com/react@18.2.0", { redirect: "manual" });
+      expect(redirectResponse.status).toBe(301);
+
+      let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
+      expect(response.status).toBe(501);
+      expect(await response.json()).toEqual({
+        error: {
+          code: "BUILD_NOT_IMPLEMENTED",
+          message: "ESM build artifacts are not implemented yet. Phase 1 only resolves URLs and serves metadata.",
+        },
+      });
+    });
+  });
+
   describe("/browse/* requests", () => {
     it("redirects to the package root", async () => {
       let response = await dispatchFetch("https://unpkg.com/browse/react@18.2.0/", { redirect: "manual" });

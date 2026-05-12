@@ -32,6 +32,8 @@ export interface PackageJson {
   name: string;
   peerDependencies?: Record<string, string>;
   repository?: { url: string; type?: string; directory?: string };
+  types?: string;
+  typings?: string;
   unpkg?: string;
   version: string;
 }
