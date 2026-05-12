@@ -366,18 +366,18 @@ describe("handleRequest", () => {
       });
     });
 
-    it("returns a phase 1 diagnostic when a build artifact is requested", async () => {
-      let redirectResponse = await dispatchFetch("https://esm.unpkg.com/react@18.2.0", { redirect: "manual" });
+    it("proxies build artifacts from the files origin", async () => {
+      let redirectResponse = await dispatchFetch("https://esm.unpkg.com/preact@10.26.4/src/component.js", {
+        redirect: "manual",
+      });
       expect(redirectResponse.status).toBe(301);
 
       let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
-      expect(response.status).toBe(501);
-      expect(await response.json()).toEqual({
-        error: {
-          code: "BUILD_NOT_IMPLEMENTED",
-          message: "ESM build artifacts are not implemented yet. Phase 1 only resolves URLs and serves metadata.",
-        },
-      });
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+      expect(response.headers.has("X-UNPKG-Build-Key")).toBe(true);
+      expect(await response.text()).toContain("from './util?module';");
     });
   });
 

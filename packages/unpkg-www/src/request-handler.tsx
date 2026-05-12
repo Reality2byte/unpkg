@@ -339,10 +339,26 @@ async function handleEsmRequest(request: Request, env: Env, context: ExecutionCo
     });
   }
 
-  return esmError({
-    code: "BUILD_NOT_IMPLEMENTED",
-    message: "ESM build artifacts are not implemented yet. Phase 1 only resolves URLs and serves metadata.",
-    status: 501,
+  let buildSearchParams = new URLSearchParams(searchParams);
+  buildSearchParams.set("origin", normalized.url.origin);
+  let buildResponse = await fetch(new URL(`/build/${packageName}@${version}${packagePath.filename ?? ""}${normalizeEsmSearch(buildSearchParams)}`, env.FILES_ORIGIN));
+  if (!buildResponse.ok) {
+    return esmError({
+      code: "BUILD_FAILED",
+      message: await buildResponse.text(),
+      status: buildResponse.status === 404 ? 422 : buildResponse.status,
+    });
+  }
+
+  let headers = new Headers(buildResponse.headers);
+  for (let [name, value] of Object.entries(esmCorsHeaders())) {
+    headers.set(name, value);
+  }
+
+  return new Response(await buildResponse.arrayBuffer(), {
+    status: buildResponse.status,
+    statusText: buildResponse.statusText,
+    headers,
   });
 }
 

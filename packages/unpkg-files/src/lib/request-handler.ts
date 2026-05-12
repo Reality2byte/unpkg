@@ -3,6 +3,10 @@ import type { PackageFileListing } from "unpkg-worker";
 
 import { env } from "./env.ts";
 import {
+  buildEsmModule,
+  normalizeBuildOptions,
+} from "./esm-build-service.ts";
+import {
   getFile,
   listFiles,
   PackageNotFoundError,
@@ -55,6 +59,36 @@ async function handleRequest_(request: Request): Promise<Response> {
   }
 
   try {
+    if (url.pathname.startsWith("/build")) {
+      let parsed = parsePackagePathname(url.pathname.slice(6));
+      if (parsed == null) {
+        return notFound(`Invalid build pathname: ${url.pathname}`);
+      }
+
+      let { package: packageName, version, filename } = parsed;
+
+      if (version == null) {
+        return notFound(`Missing version in pathname: ${url.pathname}`);
+      }
+      if (semver.clean(version) !== version) {
+        return notFound(`Invalid version: ${version}`);
+      }
+
+      let result = await buildEsmModule(publicNpmRegistry, {
+        packageName,
+        version,
+        filename,
+        options: normalizeBuildOptions(url.searchParams),
+      });
+      if (result == null) {
+        return notFound(`Build input not found: ${url.pathname}`);
+      }
+
+      return new Response(result.code, {
+        headers: result.headers,
+      });
+    }
+
     if (url.pathname.startsWith("/file")) {
       let parsed = parsePackagePathname(url.pathname.slice(5));
       if (parsed == null) {
