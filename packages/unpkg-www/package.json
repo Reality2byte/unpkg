@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "wrangler deploy --dry-run --outdir=dist",
-    "build:assets": "node --disable-warning=ExperimentalWarning ../../scripts/build-assets.ts",
+    "build:assets": "bun ../../scripts/build-assets.ts",
     "dev": "wrangler dev --env dev --port 3000",
     "dev:assets": "bun ../../scripts/serve-assets.ts",
     "test": "bun --preload=./test/setup.ts test",
