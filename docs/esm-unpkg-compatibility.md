@@ -18,10 +18,11 @@ ESM_UNPKG_ORIGIN=https://esm-beta.unpkg.com pnpm test:esm-compat
 
 Useful options:
 
+- `--corpus <path>` runs a checked-in or generated corpus file instead of the built-in seed cases.
 - `--dry-run` prints the cases without making network requests.
-- `--json` emits machine-readable results for dashboards or CI artifacts.
+- `--json` emits machine-readable results with response headers, redirect chains, diagnostic categories, content lengths, durations, and grouped summaries for dashboards or CI artifacts.
 
-The suite currently covers package roots, subpaths, `?deps`, `?alias`, `?external` shorthand, no-bundle mode, metadata, worker wrappers, runtime-native targets, and unsupported source diagnostics. The launch gate should expand this list with the agreed top-100 npm package set before `esm.unpkg.com` is promoted from beta.
+The built-in seed suite is also available as `scripts/esm-compat-corpus.seed.json`. It covers package roots, subpaths, `?deps`, `?alias`, `?external` shorthand, no-bundle mode, metadata, worker wrappers, runtime-native targets, and unsupported source diagnostics. The launch gate should expand this list with the agreed top-100 npm package set before `esm.unpkg.com` is promoted from beta.
 
 For the broader path from the current representative suite to ecosystem-scale confidence, see [`esm-unpkg-ecosystem-compatibility-plan.md`](./esm-unpkg-ecosystem-compatibility-plan.md).
 
