@@ -10,6 +10,7 @@ const env: Env = {
   FILES_ORIGIN: "https://files.unpkg.com",
   MODE: "test",
   ORIGIN: "https://esm.unpkg.com",
+  WWW_ORIGIN: "https://unpkg.com",
 };
 
 const context = {
@@ -104,6 +105,20 @@ describe("handleRequest", () => {
   afterAll(() => {
     globalThis.caches = globalCaches!;
     globalThis.fetch = globalFetch!;
+  });
+
+  it("redirects / to unpkg.com", async () => {
+    let response = await dispatchFetch("https://esm.unpkg.com/", { redirect: "manual" });
+
+    expect(response.status).toBe(301);
+    expect(response.headers.get("Location")).toBe("https://unpkg.com");
+  });
+
+  it("redirects /index.html to unpkg.com", async () => {
+    let response = await dispatchFetch("https://esm.unpkg.com/index.html", { redirect: "manual" });
+
+    expect(response.status).toBe(301);
+    expect(response.headers.get("Location")).toBe("https://unpkg.com");
   });
 
   it("resolves semver ranges with a normalized temporary redirect", async () => {

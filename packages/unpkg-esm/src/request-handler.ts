@@ -40,6 +40,10 @@ export async function handleRequest(request: Request, env: Env, context: Executi
     return new Response("OK");
   }
 
+  if (url.pathname === "/" || url.pathname === "/index.html") {
+    return redirect(env.WWW_ORIGIN, 301);
+  }
+
   if (url.pathname === "/run" || url.pathname === "/tsx") {
     return new Response(createInlineRunner(), {
       headers: corsHeaders({
