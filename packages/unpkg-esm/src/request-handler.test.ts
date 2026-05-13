@@ -53,6 +53,18 @@ describe("handleRequest", () => {
       }
 
       switch (url.href) {
+        case "https://registry.npmjs.org/@types/react":
+          return Response.json({
+            name: "@types/react",
+            "dist-tags": { latest: "18.2.0" },
+            versions: {
+              "18.2.0": {
+                name: "@types/react",
+                version: "18.2.0",
+                types: "index.d.ts",
+              },
+            },
+          });
         case "https://registry.npmjs.org/preact":
           return fileResponse(packageInfo.preact);
         case "https://registry.npmjs.org/react":
@@ -167,6 +179,31 @@ describe("handleRequest", () => {
     expect(await response.text()).toMatch(/"name": "react"/);
   });
 
+  it("serves declaration files without building them", async () => {
+    let redirectResponse = await dispatchFetch("https://esm.unpkg.com/preact@10.26.4/src/index.d.ts", {
+      redirect: "manual",
+    });
+    expect(redirectResponse.status).toBe(301);
+
+    let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/typescript; charset=utf-8");
+    expect(await response.text()).toContain("export as namespace preact");
+  });
+
+  it("redirects types-only package metadata requests to declarations", async () => {
+    let redirectResponse = await dispatchFetch("https://esm.unpkg.com/@types/react@18.2.0?meta", {
+      redirect: "manual",
+    });
+    expect(redirectResponse.status).toBe(301);
+
+    let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`, {
+      redirect: "manual",
+    });
+    expect(response.status).toBe(301);
+    expect(response.headers.get("Location")).toBe("/@types/react@18.2.0/index.d.ts");
+  });
+
   it("returns module worker wrappers", async () => {
     let redirectResponse = await dispatchFetch("https://esm.unpkg.com/preact@10.26.4/src/component.js?worker", {
       redirect: "manual",
@@ -251,5 +288,35 @@ describe("resolveTypesPath", () => {
         "./subpath"
       )
     ).toBe("./types/subpath.d.ts");
+  });
+
+  it("resolves nested types export conditions before typesVersions", () => {
+    expect(
+      resolveTypesPath(
+        {
+          dependencies: {},
+          description: "",
+          exports: {
+            ".": {
+              "types@<=5.0": {
+                default: "./ts5.0/index.d.ts",
+              },
+              types: {
+                default: "./index.d.ts",
+              },
+            },
+          },
+          name: "@types/pkg",
+          types: "index.d.ts",
+          typesVersions: {
+            "<=5.0": {
+              "*": ["ts5.0/*"],
+            },
+          },
+          version: "1.0.0",
+        },
+        "."
+      )
+    ).toBe("./index.d.ts");
   });
 });

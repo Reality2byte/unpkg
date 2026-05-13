@@ -99,16 +99,42 @@ export async function handleRequest(request: Request, env: Env, context: Executi
 
   let packageJson = packageInfo.versions[version];
 
-  if (searchParams.has("meta")) {
-    return Response.json(
-      await createMetadata(env, normalized.url.origin, packageName, version, packagePath.filename, packageJson, searchParams),
-      {
+  if (isTypeDeclarationPath(packagePath.filename)) {
+    return serveRawFile(env, packageName, version, packagePath.filename);
+  }
+
+  if (isTypesOnlyPackage(packageName) && packagePath.filename == null) {
+    let typesPath = getPackageTypesUrl(normalized.url.origin, packageName, version, packagePath.filename, packageJson);
+    if (typesPath != null) {
+      return redirect(new URL(typesPath).pathname, {
+        status: 301,
         headers: corsHeaders({
-          "Cache-Control": "public, max-age=60, s-maxage=300",
-          "Content-Type": "application/json",
+          "Cache-Control": "public, max-age=31536000, immutable",
         }),
-      }
+      });
+    }
+  }
+
+  if (searchParams.has("meta")) {
+    let metadata = await createMetadata(
+      env,
+      normalized.url.origin,
+      packageName,
+      version,
+      packagePath.filename,
+      packageJson,
+      searchParams
     );
+    if ("response" in metadata) {
+      return metadata.response;
+    }
+
+    return Response.json(metadata, {
+      headers: corsHeaders({
+        "Cache-Control": "public, max-age=60, s-maxage=300",
+        "Content-Type": "application/json",
+      }),
+    });
   }
 
   if (searchParams.has("worker")) {
@@ -129,27 +155,7 @@ export async function handleRequest(request: Request, env: Env, context: Executi
   }
 
   if (searchParams.has("raw")) {
-    let rawResponse = await fetch(
-      new URL(`/file/${packageName}@${version}${packagePath.filename ?? "/package.json"}`, env.FILES_ORIGIN)
-    );
-    if (!rawResponse.ok) {
-      return jsonError({
-        code: "RAW_FILE_NOT_FOUND",
-        message: await rawResponse.text(),
-        status: rawResponse.status,
-      });
-    }
-
-    let headers = new Headers(rawResponse.headers);
-    for (let [name, value] of Object.entries(corsHeaders())) {
-      headers.set(name, value);
-    }
-
-    return new Response(await rawResponse.arrayBuffer(), {
-      status: rawResponse.status,
-      statusText: rawResponse.statusText,
-      headers,
-    });
+    return serveRawFile(env, packageName, version, packagePath.filename ?? "/package.json");
   }
 
   let buildSearchParams = new URLSearchParams(searchParams);
@@ -161,7 +167,7 @@ export async function handleRequest(request: Request, env: Env, context: Executi
     return jsonError({
       code: "BUILD_FAILED",
       message: await buildResponse.text(),
-      status: buildResponse.status === 404 ? 422 : buildResponse.status,
+      status: buildResponse.status,
     });
   }
 
@@ -208,7 +214,7 @@ async function createMetadata(
   filename: string | undefined,
   packageJson: PackageJson,
   searchParams: URLSearchParams
-): Promise<Metadata> {
+): Promise<Metadata | { response: Response }> {
   let subpath = getEsmPackageSubpath(filename);
   let target = searchParams.get("target") ?? "es2022";
   let artifactSearchParams = new URLSearchParams(searchParams);
@@ -218,6 +224,9 @@ async function createMetadata(
   let module = new URL(modulePath, origin).toString();
   let types = getPackageTypesUrl(origin, packageName, version, filename, packageJson);
   let integrity = await getBuildIntegrity(env, origin, packageName, version, filename, artifactSearchParams);
+  if ("response" in integrity) {
+    return integrity;
+  }
 
   return {
     name: packageName,
@@ -227,7 +236,7 @@ async function createMetadata(
     target,
     module,
     types,
-    integrity,
+    integrity: integrity.value,
     dependencies: packageJson.dependencies ?? {},
     peerDependencies: packageJson.peerDependencies ?? {},
     exports: listExportSubpaths(packageJson),
@@ -246,23 +255,64 @@ async function getBuildIntegrity(
   version: string,
   filename: string | undefined,
   searchParams: URLSearchParams
-): Promise<string | null> {
+): Promise<{ response: Response } | { value: string | null }> {
   if (searchParams.has("raw")) {
-    return null;
+    return { value: null };
   }
 
   let buildSearchParams = new URLSearchParams(searchParams);
   buildSearchParams.set("origin", origin);
-  let response = await fetch(
-    new URL(`/build/${packageName}@${version}${filename ?? ""}${normalizeSearch(buildSearchParams)}`, env.FILES_ORIGIN)
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      new URL(`/build/${packageName}@${version}${filename ?? ""}${normalizeSearch(buildSearchParams)}`, env.FILES_ORIGIN)
+    );
+  } catch {
+    return { value: null };
+  }
+
   if (!response.ok) {
-    return null;
+    if (response.status === 404) {
+      return {
+        response: jsonError({
+          code: "BUILD_NOT_FOUND",
+          message: await response.text(),
+          status: 404,
+        }),
+      };
+    }
+
+    return { value: null };
   }
 
   let bytes = await response.arrayBuffer();
   let digest = await crypto.subtle.digest("SHA-384", bytes);
-  return `sha384-${base64Encode(new Uint8Array(digest))}`;
+  return { value: `sha384-${base64Encode(new Uint8Array(digest))}` };
+}
+
+async function serveRawFile(env: Env, packageName: string, version: string, filename: string): Promise<Response> {
+  let rawResponse = await fetch(new URL(`/file/${packageName}@${version}${filename}`, env.FILES_ORIGIN));
+  if (!rawResponse.ok) {
+    return jsonError({
+      code: "RAW_FILE_NOT_FOUND",
+      message: await rawResponse.text(),
+      status: rawResponse.status,
+    });
+  }
+
+  let headers = new Headers(rawResponse.headers);
+  if (isTypeDeclarationPath(filename)) {
+    headers.set("Content-Type", "application/typescript; charset=utf-8");
+  }
+  for (let [name, value] of Object.entries(corsHeaders())) {
+    headers.set(name, value);
+  }
+
+  return new Response(await rawResponse.arrayBuffer(), {
+    status: rawResponse.status,
+    statusText: rawResponse.statusText,
+    headers,
+  });
 }
 
 function getPackageTypesUrl(
@@ -274,6 +324,14 @@ function getPackageTypesUrl(
 ): string | null {
   let types = resolveTypesPath(packageJson, getEsmPackageSubpath(filename));
   return types == null ? null : new URL(`/${packageName}@${version}/${types.replace(/^\.?\/*/, "")}`, origin).toString();
+}
+
+function isTypesOnlyPackage(packageName: string): boolean {
+  return packageName.startsWith("@types/");
+}
+
+function isTypeDeclarationPath(filename: string | undefined): filename is string {
+  return filename?.endsWith(".d.ts") || filename?.endsWith(".d.mts") || filename?.endsWith(".d.cts") || false;
 }
 
 export function resolveTypesPath(packageJson: PackageJson, subpath: string): string | null {
@@ -340,12 +398,47 @@ function findTypesExport(value: unknown): string | null {
     return null;
   }
 
-  if ("types" in value && typeof value.types === "string") {
-    return value.types;
+  let conditions = value as Record<string, unknown>;
+  let types = conditions.types;
+  if (typeof types === "string") {
+    return types;
+  }
+  if (typeof types === "object" && types != null) {
+    let resolved = findConditionalExport(types);
+    if (resolved != null) {
+      return resolved;
+    }
   }
 
-  for (let nested of Object.values(value)) {
+  for (let [name, nested] of Object.entries(conditions)) {
+    if (name === "types" || name.startsWith("types@")) {
+      continue;
+    }
+
     let resolved = findTypesExport(nested);
+    if (resolved != null) {
+      return resolved;
+    }
+  }
+
+  return null;
+}
+
+function findConditionalExport(value: unknown): string | null {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value !== "object" || value == null) {
+    return null;
+  }
+
+  let conditions = value as Record<string, unknown>;
+  if (typeof conditions.default === "string") {
+    return conditions.default;
+  }
+
+  for (let nested of Object.values(conditions)) {
+    let resolved = findConditionalExport(nested);
     if (resolved != null) {
       return resolved;
     }

@@ -1,4 +1,7 @@
 import { Readable } from "node:stream";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
 import gunzipMaybe from "gunzip-maybe";
 import tar from "tar-stream";
@@ -8,7 +11,6 @@ import { getContentType } from "./content-type.ts";
 import { SubresourceIntegrityHasher } from "./subresource-integrity.ts";
 
 const TARBALL_FETCH_TIMEOUT_MS = 30_000;
-
 export async function getFile(
   registry: string,
   packageName: string,
@@ -58,6 +60,34 @@ export async function listFiles(
   return files;
 }
 
+export async function withPackageFileDirectory<T>(
+  registry: string,
+  packageName: string,
+  version: string,
+  handler: (directory: string) => Promise<T>
+): Promise<T> {
+  let directory = await mkdtemp(path.join(os.tmpdir(), "unpkg-package-"));
+
+  try {
+    await fetchAndParsePackage(registry, packageName, version, {
+      buffer: true,
+      async handler(filename, content) {
+        let relativePath = filename.replace(/^\/+/, "");
+        if (relativePath === "") return;
+
+        let filePath = path.join(directory, ...relativePath.split("/"));
+        await mkdir(path.dirname(filePath), { recursive: true });
+        await writeFile(filePath, content!);
+      },
+      filter: (name) => !name.endsWith("/"),
+    });
+
+    return await handler(directory);
+  } finally {
+    await rm(directory, { force: true, recursive: true });
+  }
+}
+
 export class PackageNotFoundError extends Error {
   registry: string;
   packageName: string;
@@ -96,7 +126,13 @@ export class TarballFetchTimeoutError extends Error {
 
 interface EntryHandlerOptions {
   buffer?: boolean;
-  handler: (name: string, content: Uint8Array | null, integrity: string, size: number, header: tar.Headers) => boolean | void;
+  handler: (
+    name: string,
+    content: Uint8Array | null,
+    integrity: string,
+    size: number,
+    header: tar.Headers
+  ) => boolean | void | Promise<boolean | void>;
   filter?: (name: string, header: tar.Headers) => boolean;
 }
 
@@ -221,14 +257,14 @@ async function fetchAndParsePackage(
         if (chunks) chunks.push(chunk);
       });
 
-      stream.on("end", () => {
+      stream.on("end", async () => {
         if (settled) return;
         try {
           let content = chunks
             ? chunks.length === 1 ? chunks[0] : Buffer.concat(chunks)
             : null;
           let integrity = hasher.digest();
-          let done = options.handler(name, content, integrity, size, header);
+          let done = await options.handler(name, content, integrity, size, header);
           if (done) {
             settled = true;
             if (!stream.destroyed) stream.destroy();

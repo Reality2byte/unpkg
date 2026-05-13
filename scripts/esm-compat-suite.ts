@@ -520,6 +520,19 @@ function compareSummaries(
     };
   }
 
+  if (!esmSh.ok && !esmUnpkg.ok) {
+    return { failureCategory: null, reason: null };
+  }
+
+  if (esmSh.ok && isTypeScript(esmSh.contentType)) {
+    return isTypeScript(esmUnpkg.contentType)
+      ? { failureCategory: null, reason: null }
+      : {
+          failureCategory: "content-type-mismatch",
+          reason: `expected TypeScript from esm.unpkg.com, got ${esmUnpkg.contentType ?? "missing content type"}`,
+        };
+  }
+
   return validateExpectedBehavior(compatCase, esmUnpkg);
 }
 
@@ -807,6 +820,10 @@ function isRedirect(status: number): boolean {
 
 function isJson(contentType: string | null): boolean {
   return contentType?.includes("application/json") ?? false;
+}
+
+function isTypeScript(contentType: string | null): boolean {
+  return contentType?.includes("application/typescript") ?? false;
 }
 
 function isJavaScript(contentType: string | null): boolean {

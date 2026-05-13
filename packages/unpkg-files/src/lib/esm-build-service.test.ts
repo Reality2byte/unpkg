@@ -8,7 +8,6 @@ import {
   rewriteEsmImports,
   transformSource,
   UnsupportedDynamicRequireError,
-  UnsupportedNodeBuiltinError,
 } from "./esm-build-service.ts";
 
 const registry = "https://registry.npmjs.org";
@@ -84,6 +83,23 @@ describe("resolveBuildFilename", () => {
 
   it("falls back to explicit filenames when no export matches", () => {
     expect(resolveBuildFilename(packageJson, "/dist/index.js", options())).toBe("/dist/index.js");
+  });
+
+  it("allows extensionless browser entrypoints", () => {
+    expect(
+      resolveBuildFilename(
+        {
+          browser: "./index",
+          main: "./index.cjs",
+        },
+        undefined,
+        options()
+      )
+    ).toBe("/index");
+  });
+
+  it("falls back to index.js for package roots without entrypoint fields", () => {
+    expect(resolveBuildFilename({}, undefined, options())).toBe("/index.js");
   });
 });
 
@@ -194,19 +210,19 @@ describe("rewriteEsmImports", () => {
     expect(result).toContain('from "https://esm.unpkg.com/@jspm/core@2/nodelibs/browser/os"');
   });
 
-  it("rejects hard Node-only builtins", async () => {
+  it("rewrites Node-only builtins to browser polyfills", async () => {
     let code = 'import fs from "node:fs";';
+    let result = await rewriteEsmImports(code, registry, "https://esm.unpkg.com", {}, options());
 
-    await expect(rewriteEsmImports(code, registry, "https://esm.unpkg.com", {}, options())).rejects.toBeInstanceOf(
-      UnsupportedNodeBuiltinError
-    );
+    expect(result).toBe('import fs from "https://esm.unpkg.com/@jspm/core@2/nodelibs/browser/fs";');
   });
 
-  it("rejects additional hard Node-only builtins", async () => {
+  it("rewrites additional Node-only builtins to browser polyfills", async () => {
     let code = 'import workerThreads from "node:worker_threads";';
+    let result = await rewriteEsmImports(code, registry, "https://esm.unpkg.com", {}, options());
 
-    await expect(rewriteEsmImports(code, registry, "https://esm.unpkg.com", {}, options())).rejects.toBeInstanceOf(
-      UnsupportedNodeBuiltinError
+    expect(result).toBe(
+      'import workerThreads from "https://esm.unpkg.com/@jspm/core@2/nodelibs/browser/worker_threads";'
     );
   });
 

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import * as esbuild from "esbuild";
@@ -9,7 +10,7 @@ import {
 } from "unpkg-worker";
 import type { PackageInfo } from "unpkg-worker";
 
-import { getFile } from "./npm-files.ts";
+import { getFile, withPackageFileDirectory } from "./npm-files.ts";
 
 const defaultEsmOrigin = "https://esm.unpkg.com";
 const hardNodeBuiltins = new Set([
@@ -37,35 +38,55 @@ const hardNodeBuiltins = new Set([
 const browserBuiltinPolyfills: Record<string, string> = {
   "node:assert": "@jspm/core@2/nodelibs/browser/assert",
   "node:buffer": "@jspm/core@2/nodelibs/browser/buffer",
+  "node:child_process": "@jspm/core@2/nodelibs/browser/child_process",
+  "node:cluster": "@jspm/core@2/nodelibs/browser/cluster",
   "node:crypto": "@jspm/core@2/nodelibs/browser/crypto",
+  "node:dgram": "@jspm/core@2/nodelibs/browser/dgram",
+  "node:dns": "@jspm/core@2/nodelibs/browser/dns",
   "node:events": "@jspm/core@2/nodelibs/browser/events",
+  "node:fs": "@jspm/core@2/nodelibs/browser/fs",
   "node:http": "@jspm/core@2/nodelibs/browser/http",
   "node:https": "@jspm/core@2/nodelibs/browser/https",
+  "node:module": "@jspm/core@2/nodelibs/browser/module",
+  "node:net": "@jspm/core@2/nodelibs/browser/net",
   "node:os": "@jspm/core@2/nodelibs/browser/os",
   "node:path": "@jspm/core@2/nodelibs/browser/path",
   "node:punycode": "@jspm/core@2/nodelibs/browser/punycode",
   "node:process": "@jspm/core@2/nodelibs/browser/process",
+  "node:readline": "@jspm/core@2/nodelibs/browser/readline",
   "node:stream": "@jspm/core@2/nodelibs/browser/stream",
   "node:string_decoder": "@jspm/core@2/nodelibs/browser/string_decoder",
   "node:timers": "@jspm/core@2/nodelibs/browser/timers",
+  "node:tls": "@jspm/core@2/nodelibs/browser/tls",
   "node:url": "@jspm/core@2/nodelibs/browser/url",
   "node:util": "@jspm/core@2/nodelibs/browser/util",
+  "node:worker_threads": "@jspm/core@2/nodelibs/browser/worker_threads",
   "node:zlib": "@jspm/core@2/nodelibs/browser/zlib",
   assert: "@jspm/core@2/nodelibs/browser/assert",
   buffer: "@jspm/core@2/nodelibs/browser/buffer",
+  child_process: "@jspm/core@2/nodelibs/browser/child_process",
+  cluster: "@jspm/core@2/nodelibs/browser/cluster",
   crypto: "@jspm/core@2/nodelibs/browser/crypto",
+  dgram: "@jspm/core@2/nodelibs/browser/dgram",
+  dns: "@jspm/core@2/nodelibs/browser/dns",
   events: "@jspm/core@2/nodelibs/browser/events",
+  fs: "@jspm/core@2/nodelibs/browser/fs",
   http: "@jspm/core@2/nodelibs/browser/http",
   https: "@jspm/core@2/nodelibs/browser/https",
+  module: "@jspm/core@2/nodelibs/browser/module",
+  net: "@jspm/core@2/nodelibs/browser/net",
   os: "@jspm/core@2/nodelibs/browser/os",
   path: "@jspm/core@2/nodelibs/browser/path",
   punycode: "@jspm/core@2/nodelibs/browser/punycode",
   process: "@jspm/core@2/nodelibs/browser/process",
+  readline: "@jspm/core@2/nodelibs/browser/readline",
   stream: "@jspm/core@2/nodelibs/browser/stream",
   string_decoder: "@jspm/core@2/nodelibs/browser/string_decoder",
   timers: "@jspm/core@2/nodelibs/browser/timers",
+  tls: "@jspm/core@2/nodelibs/browser/tls",
   url: "@jspm/core@2/nodelibs/browser/url",
   util: "@jspm/core@2/nodelibs/browser/util",
+  worker_threads: "@jspm/core@2/nodelibs/browser/worker_threads",
   zlib: "@jspm/core@2/nodelibs/browser/zlib",
 };
 
@@ -169,6 +190,11 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
     throw new UnsupportedSourceTypeError(filename);
   }
 
+  filename = await resolveExistingSourceFilename(registry, request.packageName, request.version, filename);
+  if (filename == null) {
+    return null;
+  }
+
   let file = await getFile(registry, request.packageName, request.version, filename);
   if (file == null || !isSupportedSourceFile(filename)) {
     return null;
@@ -179,7 +205,9 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
   let transformed =
     request.options.bundleMode === "none"
       ? await transformSource(code, filename, request.options)
-      : await bundleSource(registry, request.packageName, request.version, filename, code, request.options);
+      : await withPackageFileDirectory(registry, request.packageName, request.version, (packageDirectory) =>
+          bundleSource(packageDirectory, request.packageName, request.version, filename, code, request.options)
+        );
   let rewritten = await rewriteEsmImports(transformed.code, registry, request.options.origin, deps, request.options);
   let buildKey = createBuildKey(request, filename);
   let metadata: BuildMetadata = {
@@ -203,6 +231,29 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
     },
     metadata,
   };
+}
+
+async function resolveExistingSourceFilename(
+  registry: string,
+  packageName: string,
+  version: string,
+  filename: string
+): Promise<string | null> {
+  if ((await getFile(registry, packageName, version, filename)) != null) {
+    return filename;
+  }
+
+  if (path.posix.extname(filename) !== "") {
+    return null;
+  }
+
+  for (let candidate of [`${filename}.js`, `${filename}.mjs`, `${filename}.cjs`, path.posix.join(filename, "index.js")]) {
+    if ((await getFile(registry, packageName, version, candidate)) != null) {
+      return candidate;
+    }
+  }
+
+  return null;
 }
 
 export async function transformInlineEsmModule(registry: string, request: InlineTransformRequest): Promise<BuildResult> {
@@ -300,7 +351,7 @@ export async function rewriteEsmImports(
 }
 
 export async function bundleSource(
-  registry: string,
+  packageDirectory: string,
   packageName: string,
   version: string,
   filename: string,
@@ -320,7 +371,7 @@ export async function bundleSource(
     jsxImportSource: options.jsxImportSource,
     keepNames: options.keepNames,
     minify: options.minify,
-    plugins: [createPackageInternalBundlePlugin(registry, packageName, version)],
+    plugins: [createPackageInternalBundlePlugin(packageDirectory, packageName, version)],
     sourcemap: options.sourcemap ? "inline" : false,
     stdin: {
       contents: code,
@@ -418,11 +469,13 @@ export function resolveBuildFilename(
     );
   }
 
-  return resolvePackageExport(packageJson as Parameters<typeof resolvePackageExport>[0], "/", {
-    conditions: getBuildConditions(options),
-    useBrowserField: !isRuntimeNativeTarget(options.target),
-    useModuleField: packageJson.exports == null,
-  });
+  return (
+    resolvePackageExport(packageJson as Parameters<typeof resolvePackageExport>[0], "/", {
+      conditions: getBuildConditions(options),
+      useBrowserField: !isRuntimeNativeTarget(options.target),
+      useModuleField: packageJson.exports == null,
+    }) ?? "/index.js"
+  );
 }
 
 function parseConditions(searchParams: URLSearchParams): string[] {
@@ -529,7 +582,7 @@ function addCommonJsNamedExports(code: string, exportNames: string[]): string {
 }
 
 function createPackageInternalBundlePlugin(
-  registry: string,
+  packageDirectory: string,
   packageName: string,
   version: string
 ): esbuild.Plugin {
@@ -539,6 +592,13 @@ function createPackageInternalBundlePlugin(
       build.onResolve({ filter: /.*/ }, (args) => {
         if (args.kind === "entry-point") {
           return null;
+        }
+
+        if (isUnsupportedSourceFile(args.path)) {
+          return {
+            path: args.path,
+            namespace: "unpkg-empty-module",
+          };
         }
 
         if (isBareSpecifier(args.path) || isValidUrl(args.path)) {
@@ -557,7 +617,7 @@ function createPackageInternalBundlePlugin(
       });
 
       build.onLoad({ filter: /.*/, namespace: "unpkg-package" }, async (args) => {
-        let file = await getFirstExistingSourceFile(registry, packageName, version, args.path);
+        let file = await getFirstExistingSourceFile(packageDirectory, args.path);
         if (file == null) {
           return {
             errors: [{ text: `File not found: ${args.path}` }],
@@ -570,27 +630,44 @@ function createPackageInternalBundlePlugin(
           resolveDir: path.posix.dirname(file.path),
         };
       });
+
+      build.onLoad({ filter: /.*/, namespace: "unpkg-empty-module" }, () => ({
+        contents: "",
+        loader: "js",
+      }));
     },
   };
 }
 
 async function getFirstExistingSourceFile(
-  registry: string,
-  packageName: string,
-  version: string,
+  packageDirectory: string,
   filename: string
 ): Promise<{ body: Uint8Array; path: string } | null> {
   for (let candidate of getSourceFileCandidates(filename)) {
-    let file = await getFile(registry, packageName, version, candidate);
-    if (file != null && isSupportedSourceFile(candidate)) {
+    if (isSupportedSourceFile(candidate)) {
+      let body = await readPackageFile(packageDirectory, candidate);
+      if (body == null) continue;
+
       return {
-        body: file.body,
+        body,
         path: candidate,
       };
     }
   }
 
   return null;
+}
+
+async function readPackageFile(packageDirectory: string, filename: string): Promise<Uint8Array | null> {
+  try {
+    return await readFile(path.join(packageDirectory, ...filename.replace(/^\/+/, "").split("/")));
+  } catch (error) {
+    if (error instanceof Error && "code" in error && (error.code === "ENOENT" || error.code === "ENOTDIR")) {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 function getSourceFileCandidates(filename: string): string[] {
@@ -613,7 +690,7 @@ function getSourceFileCandidates(filename: string): string[] {
 }
 
 function isSupportedSourceFile(filename: string): boolean {
-  return /\.(?:[cm]?js|jsx|tsx?)$/.test(filename);
+  return /\.(?:[cm]?js|jsx|tsx?|json)$/.test(filename);
 }
 
 function isUnsupportedSourceFile(filename: string): boolean {
@@ -655,11 +732,11 @@ async function rewriteEsmSpecifier(
     return specifier;
   }
 
-  if (hardNodeBuiltins.has(specifier)) {
-    throw new UnsupportedNodeBuiltinError(specifier);
-  }
   if (specifier in browserBuiltinPolyfills) {
     return `${origin}/${browserBuiltinPolyfills[specifier]}`;
+  }
+  if (hardNodeBuiltins.has(specifier)) {
+    throw new UnsupportedNodeBuiltinError(specifier);
   }
 
   if (specifier === "" || isValidUrl(specifier)) {
