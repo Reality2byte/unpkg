@@ -294,6 +294,133 @@ function createRuntimeSmokeCases(): RuntimeSmokeCase[] {
     {
       case: {
         category: "runtime",
+        description: "Vue mounts a browser app",
+        expect: "module",
+        features: ["runtime", "vue", "render"],
+        package: "vue",
+        path: "/__runtime/vue-mount",
+      },
+      run: (page, origin) =>
+        page.evaluate(async (esmOrigin) => {
+          let { createApp, h } = await import(`${esmOrigin}/vue@3.5.13`);
+          let container = document.createElement("div");
+          document.body.append(container);
+          let app = createApp({
+            render: () => h("button", { type: "button" }, "Hello Vue"),
+          });
+          app.mount(container);
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+          if (container.textContent !== "Hello Vue") {
+            throw new Error(`Vue mount failed: ${container.textContent ?? ""}`);
+          }
+          app.unmount();
+          return ["createApp", "h", "mount"];
+        }, origin),
+    },
+    {
+      case: {
+        category: "runtime",
+        description: "D3 scale computes browser values",
+        expect: "module",
+        features: ["runtime", "d3"],
+        package: "d3-scale",
+        path: "/__runtime/d3-scale",
+      },
+      run: (page, origin) =>
+        page.evaluate(async (esmOrigin) => {
+          let { scaleLinear } = await import(`${esmOrigin}/d3-scale@4.0.2`);
+          let scale = scaleLinear([0, 10], [0, 100]);
+          let value = scale(2.5);
+          if (value !== 25) {
+            throw new Error(`Unexpected d3-scale result: ${value}`);
+          }
+          return ["scaleLinear"];
+        }, origin),
+    },
+    {
+      case: {
+        category: "runtime",
+        description: "RxJS observable emits transformed values",
+        expect: "module",
+        features: ["runtime", "rxjs"],
+        package: "rxjs",
+        path: "/__runtime/rxjs-observable",
+      },
+      run: (page, origin) =>
+        page.evaluate(async (esmOrigin) => {
+          let { firstValueFrom, map, of } = await import(`${esmOrigin}/rxjs@7.8.1`);
+          let value = await firstValueFrom(of(7).pipe(map((number: number) => number * 6)));
+          if (value !== 42) {
+            throw new Error(`Unexpected RxJS result: ${value}`);
+          }
+          return ["firstValueFrom", "map", "of"];
+        }, origin),
+    },
+    {
+      case: {
+        category: "runtime",
+        description: "Yup validates browser data",
+        expect: "module",
+        features: ["runtime", "validation"],
+        package: "yup",
+        path: "/__runtime/yup-validation",
+      },
+      run: (page, origin) =>
+        page.evaluate(async (esmOrigin) => {
+          let yup = await import(`${esmOrigin}/yup@1.6.1`);
+          let schema = yup.object({
+            name: yup.string().required(),
+            count: yup.number().min(2).required(),
+          });
+          let value = await schema.validate({ name: "modules", count: 3 });
+          if (value.name !== "modules" || value.count !== 3) {
+            throw new Error(`Unexpected Yup validation result: ${JSON.stringify(value)}`);
+          }
+          return ["object", "string", "number", "validate"];
+        }, origin),
+    },
+    {
+      case: {
+        category: "runtime",
+        description: "GraphQL parses a document in Chromium",
+        expect: "module",
+        features: ["runtime", "graphql"],
+        package: "graphql",
+        path: "/__runtime/graphql-parse",
+      },
+      run: (page, origin) =>
+        page.evaluate(async (esmOrigin) => {
+          let { parse } = await import(`${esmOrigin}/graphql@16.10.0`);
+          let document = parse("query SmokeTest { viewer { id } }");
+          let operation = document.definitions[0];
+          if (operation.kind !== "OperationDefinition" || operation.operation !== "query") {
+            throw new Error(`Unexpected GraphQL parse result: ${operation.kind}`);
+          }
+          return ["parse"];
+        }, origin),
+    },
+    {
+      case: {
+        category: "runtime",
+        description: "Buffer polyfill encodes browser bytes",
+        expect: "module",
+        features: ["runtime", "node-polyfill"],
+        package: "buffer",
+        path: "/__runtime/buffer-polyfill",
+      },
+      run: (page, origin) =>
+        page.evaluate(async (esmOrigin) => {
+          let { Buffer } = await import(`${esmOrigin}/buffer@6.0.3`);
+          let encoded = Buffer.from("esm.unpkg", "utf8").toString("base64");
+          if (encoded !== "ZXNtLnVucGtn") {
+            throw new Error(`Unexpected Buffer result: ${encoded}`);
+          }
+          return ["Buffer"];
+        }, origin),
+    },
+    {
+      case: {
+        category: "runtime",
         description: "Import-map externalization resolves bare imports",
         expect: "module",
         features: ["runtime", "external", "import-map"],
