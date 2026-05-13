@@ -861,8 +861,7 @@ function createHomePage(env: Env): string {
         <div class="code-block hljs-listing"><code>${runExampleHtml}</code></div>
 
         <p>
-          Use <code>/tsx</code> when you want the same helper behavior with inline TSX. These helpers are covered by the
-          browser smoke tests, including inline TypeScript and TSX execution in Chromium.
+          Use <code>/tsx</code> when you want the same helper behavior with inline TSX.
         </p>
 
         <div class="code-block hljs-listing"><code>${tsxExampleHtml}</code></div>
