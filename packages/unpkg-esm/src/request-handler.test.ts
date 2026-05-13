@@ -107,18 +107,24 @@ describe("handleRequest", () => {
     globalThis.fetch = globalFetch!;
   });
 
-  it("redirects / to unpkg.com", async () => {
-    let response = await dispatchFetch("https://esm.unpkg.com/", { redirect: "manual" });
+  it("serves the beta home page from /", async () => {
+    let response = await dispatchFetch("https://esm.unpkg.com/");
 
-    expect(response.status).toBe(301);
-    expect(response.headers.get("Location")).toBe("https://unpkg.com");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toMatch(/^text\/html/);
+
+    let html = await response.text();
+    expect(html).toContain("Browser-ready modules from npm.");
+    expect(html).toContain("Beta service");
+    expect(html).toContain("https://unpkg.com/#browser-modules");
+    expect(html).toContain("https://esm.unpkg.com/react@18.3.1");
   });
 
-  it("redirects /index.html to unpkg.com", async () => {
+  it("redirects /index.html to /", async () => {
     let response = await dispatchFetch("https://esm.unpkg.com/index.html", { redirect: "manual" });
 
     expect(response.status).toBe(301);
-    expect(response.headers.get("Location")).toBe("https://unpkg.com");
+    expect(response.headers.get("Location")).toBe("/");
   });
 
   it("resolves semver ranges with a normalized temporary redirect", async () => {
