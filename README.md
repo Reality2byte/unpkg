@@ -14,14 +14,15 @@ You can [learn more about UNPKG on the website](https://unpkg.com).
 
 ## Development
 
-This repository contains the production source for UNPKG. There are 4 packages:
+This repository contains the production source for UNPKG. There are 5 packages:
 
-- [`unpkg-app`](./packages/unpkg-app/) is the UNPKG web app (file browser)
-- [`unpkg-files`](./packages/unpkg-files/) is the file server backend that fetches tarballs from npm and extracts their contents
-- [`unpkg-worker`](./packages/unpkg-worker/) is a shared set of utilites between the web apps (Cloudflare workers)
-- [`unpkg-www`](./packages/unpkg-www/) is the main UNPKG app
+- [`unpkg-www`](./packages/unpkg-www/) is the main UNPKG website and package file CDN worker
+- [`unpkg-app`](./packages/unpkg-app/) is the package browser app worker
+- [`unpkg-esm`](./packages/unpkg-esm/) is the `esm.unpkg.com` package import worker for browser-ready ESM, CSS modules, import maps, and inline TS/TSX transforms
+- [`unpkg-files`](./packages/unpkg-files/) is the Bun file server backend that fetches npm tarballs, extracts files, and builds ESM artifacts for the workers
+- [`unpkg-worker`](./packages/unpkg-worker/) is the shared TypeScript library used by the workers and the files backend
 
-We use [Bun](https://bun.sh/) in development, as well as [pnpm](https://pnpm.io/). Install these first.
+We use [pnpm](https://pnpm.io/) for workspace tooling and [Bun](https://bun.sh/) for the runtime and tests. Install these first.
 
 Next, install all dependencies and run the tests:
 
@@ -30,17 +31,23 @@ pnpm install
 pnpm test
 ```
 
-Then start the file server and each worker along with its assets server (you'll need 5 terminal tabs):
+Then start the file server and each worker, plus the asset servers for the two HTML apps:
 
 ```sh
-cd packages/unpkg-files && pnpm dev
-cd packages/unpkg-www && pnpm dev
-cd packages/unpkg-www && pnpm dev:assets
-cd packages/unpkg-app && pnpm dev
-cd packages/unpkg-app && pnpm dev:assets
+pnpm --filter unpkg-files dev
+pnpm --filter unpkg-www dev
+pnpm --filter unpkg-www dev:assets
+pnpm --filter unpkg-app dev
+pnpm --filter unpkg-app dev:assets
+pnpm --filter unpkg-esm dev
 ```
 
-The dev server will be listening on `http://localhost:3000`.
+The local services listen on these ports:
+
+- `unpkg-www`: `http://localhost:3000`
+- `unpkg-app`: `http://localhost:3001`
+- `unpkg-esm`: `http://localhost:3002`
+- `unpkg-files`: `http://localhost:4000`
 
 ## Deploying
 
@@ -49,7 +56,7 @@ The `unpkg-files` backend is deployed on [Fly.io](https://fly.io). You'll need a
 Next, adjust the Fly config in `packages/unpkg-files/fly.json` (you'll need your own app `name`) and deploy:
 
 ```sh
-cd packages/unpkg-files && pnpm run deploy
+pnpm --filter unpkg-files run deploy
 ```
 
 To deploy the workers, you'll need a [Cloudflare](https://cloudflare.com) account. You will also need to (1) edit the `wrangler.json` file in each worker and update its [`routes`](https://developers.cloudflare.com/workers/wrangler/configuration/) to your own domain(s) and (2) adjust each worker's environment `vars` (in `wrangler.json`) so they can find one another in production.
@@ -57,8 +64,9 @@ To deploy the workers, you'll need a [Cloudflare](https://cloudflare.com) accoun
 Once you've done that, you can deploy each worker with:
 
 ```sh
-cd packages/unpkg-www && pnpm run deploy
-cd packages/unpkg-app && pnpm run deploy
+pnpm --filter unpkg-www run deploy
+pnpm --filter unpkg-app run deploy
+pnpm --filter unpkg-esm run deploy
 ```
 
 ## License
