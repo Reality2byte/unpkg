@@ -80,7 +80,7 @@ export function normalizeEsmRequestUrl(requestUrl: string | URL): NormalizedEsmR
     return validationError;
   }
 
-  if (!url.searchParams.has("target")) {
+  if (!url.searchParams.has("target") && !url.searchParams.has("raw")) {
     url.searchParams.set("target", "es2022");
   }
 
@@ -91,7 +91,7 @@ export function normalizeEsmRequestUrl(requestUrl: string | URL): NormalizedEsmR
     packagePath,
     search,
     searchParams: new URLSearchParams(url.searchParams),
-    target: url.searchParams.get("target")!,
+    target: url.searchParams.get("target") ?? "raw",
     url,
   };
 }

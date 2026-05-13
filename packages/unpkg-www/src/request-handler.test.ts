@@ -352,7 +352,18 @@ describe("handleRequest", () => {
       expect(json.target).toBe("es2022");
       expect(json.module).toBe("https://esm.unpkg.com/react@18.2.0?target=es2022");
       expect(json.types).toBeNull();
-      expect(json.integrity).toBeNull();
+      expect(json.integrity).toMatch(/^sha384-/);
+    });
+
+    it("returns type metadata for packages with declarations", async () => {
+      let redirectResponse = await dispatchFetch("https://esm.unpkg.com/preact@10.26.4?meta", { redirect: "manual" });
+      expect(redirectResponse.status).toBe(301);
+
+      let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
+      expect(response.status).toBe(200);
+
+      let json = (await response.json()) as any;
+      expect(json.types).toBe("https://esm.unpkg.com/preact@10.26.4/src/index.d.ts");
     });
 
     it("returns JSON diagnostics for invalid query combinations", async () => {
@@ -378,6 +389,30 @@ describe("handleRequest", () => {
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
       expect(response.headers.has("X-UNPKG-Build-Key")).toBe(true);
       expect(await response.text()).toContain('from "./util?target=es2022";');
+    });
+
+    it("adds TypeScript declaration headers to build artifacts", async () => {
+      let redirectResponse = await dispatchFetch("https://esm.unpkg.com/preact@10.26.4?no-bundle", {
+        redirect: "manual",
+      });
+      expect(redirectResponse.status).toBe(301);
+
+      let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("X-TypeScript-Types")).toBe("https://esm.unpkg.com/preact@10.26.4/src/index.d.ts");
+    });
+
+    it("serves raw files without adding a default target", async () => {
+      let redirectResponse = await dispatchFetch("https://esm.unpkg.com/react@18.2.0/package.json?raw", {
+        redirect: "manual",
+      });
+      expect(redirectResponse.status).toBe(301);
+      expect(redirectResponse.headers.get("Location")).toBe("/react@18.2.0/package.json?raw=");
+
+      let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toMatch(/^application\/json/);
+      expect(await response.text()).toMatch(/"name": "react"/);
     });
   });
 

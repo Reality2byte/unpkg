@@ -62,6 +62,12 @@ describe("normalizeEsmRequestUrl", () => {
       status: 400,
     });
   });
+
+  it("does not add a default target to raw requests", () => {
+    let result = normalizeEsmRequestUrl("https://esm.unpkg.com/react@18/package.json?raw");
+
+    expect("url" in result && result.url.search).toBe("?raw=");
+  });
 });
 
 describe("getEsmPackageSubpath", () => {

@@ -331,11 +331,33 @@ async function handleEsmRequest(request: Request, env: Env, context: ExecutionCo
   let packageJson = packageInfo.versions[version];
 
   if (searchParams.has("meta")) {
-    return Response.json(createEsmMetadata(normalized.url.origin, packageName, version, packagePath.filename, packageJson, searchParams), {
+    return Response.json(await createEsmMetadata(env, normalized.url.origin, packageName, version, packagePath.filename, packageJson, searchParams), {
       headers: esmCorsHeaders({
         "Cache-Control": "public, max-age=60, s-maxage=300",
         "Content-Type": "application/json",
       }),
+    });
+  }
+
+  if (searchParams.has("raw")) {
+    let rawResponse = await fetch(new URL(`/file/${packageName}@${version}${packagePath.filename ?? "/package.json"}`, env.FILES_ORIGIN));
+    if (!rawResponse.ok) {
+      return esmError({
+        code: "RAW_FILE_NOT_FOUND",
+        message: await rawResponse.text(),
+        status: rawResponse.status,
+      });
+    }
+
+    let headers = new Headers(rawResponse.headers);
+    for (let [name, value] of Object.entries(esmCorsHeaders())) {
+      headers.set(name, value);
+    }
+
+    return new Response(await rawResponse.arrayBuffer(), {
+      status: rawResponse.status,
+      statusText: rawResponse.statusText,
+      headers,
     });
   }
 
@@ -354,6 +376,10 @@ async function handleEsmRequest(request: Request, env: Env, context: ExecutionCo
   for (let [name, value] of Object.entries(esmCorsHeaders())) {
     headers.set(name, value);
   }
+  let types = getPackageTypesUrl(normalized.url.origin, packageName, version, packagePath.filename, packageJson);
+  if (types != null && !searchParams.has("no-dts")) {
+    headers.set("X-TypeScript-Types", types);
+  }
 
   return new Response(await buildResponse.arrayBuffer(), {
     status: buildResponse.status,
@@ -370,7 +396,7 @@ interface EsmMetadata {
   };
   dependencies: Record<string, string>;
   exports: string[];
-  integrity: null;
+  integrity: string | null;
   module: string;
   name: string;
   peerDependencies: Record<string, string>;
@@ -381,21 +407,24 @@ interface EsmMetadata {
   version: string;
 }
 
-function createEsmMetadata(
+async function createEsmMetadata(
+  env: Env,
   origin: string,
   packageName: string,
   version: string,
   filename: string | undefined,
   packageJson: PackageJson,
   searchParams: URLSearchParams
-): EsmMetadata {
+): Promise<EsmMetadata> {
   let subpath = getEsmPackageSubpath(filename);
   let target = searchParams.get("target") ?? "es2022";
   let artifactSearchParams = new URLSearchParams(searchParams);
   artifactSearchParams.delete("meta");
   let artifactSearch = normalizeEsmSearch(artifactSearchParams);
   let modulePath = `/${packageName}@${version}${filename ?? ""}${artifactSearch}`;
-  let types = packageJson.types ?? packageJson.typings ?? null;
+  let module = new URL(modulePath, origin).toString();
+  let types = getPackageTypesUrl(origin, packageName, version, filename, packageJson);
+  let integrity = await getBuildIntegrity(env, packageName, version, filename, artifactSearchParams);
 
   return {
     name: packageName,
@@ -403,9 +432,9 @@ function createEsmMetadata(
     specifier: `${packageName}@${version}`,
     subpath,
     target,
-    module: new URL(modulePath, origin).toString(),
-    types: types == null ? null : new URL(`/${packageName}@${version}/${types.replace(/^\.?\/*/, "")}`, origin).toString(),
-    integrity: null,
+    module,
+    types,
+    integrity,
     dependencies: packageJson.dependencies ?? {},
     peerDependencies: packageJson.peerDependencies ?? {},
     exports: listEsmExportSubpaths(packageJson),
@@ -415,6 +444,84 @@ function createEsmMetadata(
       sourcemap: searchParams.has("sourcemap"),
     },
   };
+}
+
+async function getBuildIntegrity(
+  env: Env,
+  packageName: string,
+  version: string,
+  filename: string | undefined,
+  searchParams: URLSearchParams
+): Promise<string | null> {
+  if (searchParams.has("raw")) {
+    return null;
+  }
+
+  let buildSearchParams = new URLSearchParams(searchParams);
+  buildSearchParams.set("origin", "https://esm.unpkg.com");
+  let response = await fetch(new URL(`/build/${packageName}@${version}${filename ?? ""}${normalizeEsmSearch(buildSearchParams)}`, env.FILES_ORIGIN));
+  if (!response.ok) {
+    return null;
+  }
+
+  let bytes = await response.arrayBuffer();
+  let digest = await crypto.subtle.digest("SHA-384", bytes);
+  return `sha384-${base64Encode(new Uint8Array(digest))}`;
+}
+
+function getPackageTypesUrl(
+  origin: string,
+  packageName: string,
+  version: string,
+  filename: string | undefined,
+  packageJson: PackageJson
+): string | null {
+  let types = resolveTypesPath(packageJson, getEsmPackageSubpath(filename));
+  return types == null ? null : new URL(`/${packageName}@${version}/${types.replace(/^\.?\/*/, "")}`, origin).toString();
+}
+
+function resolveTypesPath(packageJson: PackageJson, subpath: string): string | null {
+  let exports = packageJson.exports;
+  if (typeof exports === "object" && exports != null) {
+    let exportValue = exports[subpath];
+    let resolved = findTypesExport(exportValue);
+    if (resolved != null) {
+      return resolved;
+    }
+  }
+
+  return packageJson.types ?? packageJson.typings ?? null;
+}
+
+function findTypesExport(value: unknown): string | null {
+  if (typeof value === "string") {
+    return null;
+  }
+  if (typeof value !== "object" || value == null) {
+    return null;
+  }
+
+  if ("types" in value && typeof value.types === "string") {
+    return value.types;
+  }
+
+  for (let nested of Object.values(value)) {
+    let resolved = findTypesExport(nested);
+    if (resolved != null) {
+      return resolved;
+    }
+  }
+
+  return null;
+}
+
+function base64Encode(bytes: Uint8Array): string {
+  let binary = "";
+  for (let byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary);
 }
 
 function listEsmExportSubpaths(packageJson: PackageJson): string[] {
