@@ -25,6 +25,7 @@ Useful options:
 The built-in seed suite is also available as `scripts/esm-compat-corpus.seed.json`. It covers package roots, subpaths, `?deps`, `?alias`, `?external` shorthand, no-bundle mode, metadata, worker wrappers, runtime-native targets, and unsupported source diagnostics. The launch gate should expand this list with the agreed top-100 npm package set before `esm.unpkg.com` is promoted from beta.
 
 For the broader path from the current representative suite to ecosystem-scale confidence, see [`esm-unpkg-ecosystem-compatibility-plan.md`](./esm-unpkg-ecosystem-compatibility-plan.md).
+For the launch decision checklist, see [`esm-unpkg-launch-readiness.md`](./esm-unpkg-launch-readiness.md).
 
 For browser execution smoke checks, run:
 
