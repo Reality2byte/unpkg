@@ -437,8 +437,8 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
                   </a>
                 </li>
                 <li>
-                  <a class="text-blue-600 hover:underline break-all" href={esmUrl("/react@18/client")}>
-                    esm.unpkg.com/react@18/client
+                  <a class="text-blue-600 hover:underline break-all" href={esmUrl("/react-dom@18/client")}>
+                    esm.unpkg.com/react-dom@18/client
                   </a>
                 </li>
                 <li>
