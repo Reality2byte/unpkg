@@ -12,6 +12,7 @@
     "pretest": "pnpm run build",
     "test": "pnpm -r test",
     "test:esm-browser": "bun scripts/esm-browser-smoke.ts",
+    "test:esm-readiness": "bun scripts/esm-beta-readiness.ts",
     "test:esm-compat": "bun scripts/esm-compat-suite.ts"
   }
 }

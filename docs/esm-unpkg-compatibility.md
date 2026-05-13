@@ -34,6 +34,16 @@ pnpm test:esm-browser -- --corpus scripts/esm-compat-corpus.seed.json --origin h
 
 The browser smoke runner imports selected module scenarios in Chromium and records evaluation success, export names, request count, transferred bytes, and duration. Use `ESM_BROWSER_ORIGIN` or `--origin` to point it at a beta `esm.unpkg.com` deployment.
 
+To evaluate beta readiness from saved JSON reports:
+
+```sh
+bun scripts/esm-compat-suite.ts --json --corpus scripts/esm-compat-corpus.ecosystem.json > compat-report.json
+bun scripts/esm-browser-smoke.ts --json --corpus scripts/esm-compat-corpus.seed.json --origin https://esm-beta.unpkg.com > browser-report.json
+pnpm test:esm-readiness -- --compat compat-report.json --browser browser-report.json
+```
+
+The readiness summary checks compatibility pass rate, browser smoke pass rate, p95 response duration, p95 artifact size, and whether failures are classified by diagnostic or failure category.
+
 ## Compatibility Matrix
 
 | Feature | Status | Notes |
