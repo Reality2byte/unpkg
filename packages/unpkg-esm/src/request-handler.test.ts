@@ -118,6 +118,9 @@ describe("handleRequest", () => {
     expect(html).toContain("esm.unpkg.com is currently in beta.");
     expect(html).toContain("https://unpkg.com/#browser-modules");
     expect(html).toContain("https://esm.unpkg.com/react@18.3.1");
+    expect(html).toContain("https://esm.unpkg.com/run");
+    expect(html).toContain("https://esm.unpkg.com/tsx");
+    expect(html).toContain("text/tsx");
     expect(html).toContain("hljs-listing");
     expect(html).toContain("hljs-tag");
   });
