@@ -23,6 +23,8 @@ Useful options:
 
 The suite currently covers package roots, subpaths, `?deps`, `?alias`, `?external` shorthand, no-bundle mode, metadata, worker wrappers, runtime-native targets, and unsupported source diagnostics. The launch gate should expand this list with the agreed top-100 npm package set before `esm.unpkg.com` is promoted from beta.
 
+For the broader path from the current representative suite to ecosystem-scale confidence, see [`esm-unpkg-ecosystem-compatibility-plan.md`](./esm-unpkg-ecosystem-compatibility-plan.md).
+
 ## Compatibility Matrix
 
 | Feature | Status | Notes |
