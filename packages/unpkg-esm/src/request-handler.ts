@@ -802,7 +802,7 @@ function createHomePage(env: Env): string {
     footer {
       border-top: 1px solid #e2e8f0;
       color: #475569;
-      padding: 2rem;
+      padding: 2rem 2rem 6rem;
       font-size: 0.875rem;
     }
     @media (max-width: 640px) {

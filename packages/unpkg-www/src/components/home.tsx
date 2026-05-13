@@ -732,7 +732,7 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
         </div>
       </main>
 
-      <footer class="mx-auto lg:max-w-screen-md px-8 pb-16 text-sm text-slate-600">
+      <footer class="mx-auto lg:max-w-screen-md px-8 pt-8 pb-24 border-t border-slate-200 text-sm text-slate-600">
         <p>
           <a class="text-blue-600 hover:underline" href="https://github.com/unpkg" title="UNPKG on GitHub">
             GitHub
