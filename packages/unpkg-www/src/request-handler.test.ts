@@ -99,6 +99,8 @@ describe("handleRequest", () => {
     let response = await handleRequest(new Request("https://unpkg.dev/"), stagingEnv, context);
     let html = await response.text();
 
+    expect(html).toContain('<html lang="en" style="background-color:white;">');
+    expect(html).toContain('<body style="background-color:white;">');
     expect(html).toContain('href="https://esm.unpkg.dev/"');
     expect(html).toContain('href="https://esm.unpkg.dev/preact"');
     expect(html).toContain('href="https://esm.unpkg.dev/react-dom@18/client"');

@@ -46,7 +46,24 @@ describe("handleRequest", () => {
     } as unknown as CacheStorage;
 
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      let url = input instanceof Request ? input.url : input;
+      let request = input instanceof Request ? input : new Request(input);
+      let url = new URL(request.url);
+
+      if (url.origin === env.FILES_ORIGIN) {
+        return Response.json({
+          package: "react",
+          version: "18.2.0",
+          prefix: "/",
+          files: [
+            {
+              path: "/package.json",
+              size: 999,
+              type: "application/json",
+              integrity: "sha256-test",
+            },
+          ],
+        });
+      }
 
       switch (url.toString()) {
         case "https://registry.npmjs.org/react":
@@ -96,6 +113,14 @@ describe("handleRequest", () => {
     expect(response.status).toBe(301);
     let location = response.headers.get("Location");
     expect(location).toBe("/react@18.2.0");
+  });
+
+  it("renders package pages with an explicit white background", async () => {
+    let response = await dispatchFetch("https://app.unpkg.com/react@18.2.0");
+    let html = await response.text();
+
+    expect(html).toContain('<html lang="en" style="background-color:white;">');
+    expect(html).toContain('<body style="background-color:white;">');
   });
 
   it("resolves semver range on package root", async () => {
