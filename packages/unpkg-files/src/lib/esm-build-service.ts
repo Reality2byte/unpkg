@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import * as esbuild from "esbuild";
 import { parse } from "es-module-lexer/js";
 import {
   resolvePackageExport,
@@ -23,6 +24,10 @@ export interface NormalizedBuildOptions {
   dependencyOverrides: Record<string, string>;
   env: "development" | "production";
   external: string[];
+  ignoreAnnotations: boolean;
+  jsx?: "react" | "preact" | "automatic";
+  jsxImportSource?: string;
+  keepNames: boolean;
   minify: boolean;
   origin: string;
   sourcemap: boolean;
@@ -67,13 +72,14 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
   }
 
   let file = await getFile(registry, request.packageName, request.version, filename);
-  if (file == null || !isJavaScriptContentType(file.type)) {
+  if (file == null || !isSupportedSourceFile(filename)) {
     return null;
   }
 
   let code = new TextDecoder().decode(file.body);
   let deps = Object.assign({}, packageJson.peerDependencies, packageJson.dependencies);
-  let rewritten = await rewriteEsmImports(code, registry, request.options.origin, deps, request.options);
+  let transformed = await transformSource(code, filename, request.options);
+  let rewritten = await rewriteEsmImports(transformed.code, registry, request.options.origin, deps, request.options);
   let buildKey = createBuildKey(request, filename);
   let metadata: BuildMetadata = {
     buildKey,
@@ -91,6 +97,7 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
       "Content-Type": "application/javascript; charset=utf-8",
       "X-UNPKG-Build-Key": buildKey,
       "X-UNPKG-Build-Input": filename,
+      "X-UNPKG-Transformer": "esbuild",
     },
     metadata,
   };
@@ -102,6 +109,10 @@ export function normalizeBuildOptions(searchParams: URLSearchParams): Normalized
     dependencyOverrides: parseDependencyOverrides(searchParams.get("deps")),
     env: searchParams.has("dev") || searchParams.get("env") === "development" ? "development" : "production",
     external: searchParams.get("external")?.split(",").filter(Boolean) ?? [],
+    ignoreAnnotations: searchParams.has("ignore-annotations"),
+    jsx: parseJsxMode(searchParams.get("jsx")),
+    jsxImportSource: searchParams.get("jsxImportSource") ?? undefined,
+    keepNames: searchParams.has("keep-names"),
     minify: searchParams.has("min"),
     origin: searchParams.get("origin") ?? defaultEsmOrigin,
     sourcemap: searchParams.has("sourcemap"),
@@ -214,6 +225,55 @@ function resolveBuildFilename(packageJson: PackageJson, filename: string | undef
 
 function isJavaScriptContentType(contentType: string): boolean {
   return contentType === "text/javascript" || contentType === "application/javascript";
+}
+
+export async function transformSource(
+  code: string,
+  filename: string,
+  options: NormalizedBuildOptions
+): Promise<{ code: string; map?: string }> {
+  let result = await esbuild.transform(code, {
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(options.env),
+    },
+    format: "esm",
+    ignoreAnnotations: options.ignoreAnnotations,
+    jsx: options.jsx === "automatic" ? "automatic" : "transform",
+    jsxFactory: options.jsx === "preact" ? "h" : undefined,
+    jsxFragment: options.jsx === "preact" ? "Fragment" : undefined,
+    jsxImportSource: options.jsxImportSource,
+    keepNames: options.keepNames,
+    loader: getEsbuildLoader(filename),
+    minify: options.minify,
+    sourcemap: options.sourcemap ? "inline" : false,
+    sourcefile: filename,
+    target: options.target,
+  });
+
+  return {
+    code: result.code,
+    map: result.map,
+  };
+}
+
+function getEsbuildLoader(filename: string): esbuild.Loader {
+  if (filename.endsWith(".tsx")) return "tsx";
+  if (filename.endsWith(".ts")) return "ts";
+  if (filename.endsWith(".jsx")) return "jsx";
+  if (filename.endsWith(".json")) return "json";
+  return "js";
+}
+
+function isSupportedSourceFile(filename: string): boolean {
+  return /\.(?:[cm]?js|jsx|tsx?)$/.test(filename);
+}
+
+function parseJsxMode(value: string | null): NormalizedBuildOptions["jsx"] {
+  if (value === "react" || value === "preact" || value === "automatic") {
+    return value;
+  }
+
+  return undefined;
 }
 
 async function rewriteEsmSpecifier(

@@ -5,6 +5,7 @@ import {
   parseAliases,
   parseDependencyOverrides,
   rewriteEsmImports,
+  transformSource,
 } from "./esm-build-service.ts";
 
 const registry = "https://registry.npmjs.org";
@@ -93,6 +94,38 @@ describe("rewriteEsmImports", () => {
     let result = await rewriteEsmImports(code, registry, "https://esm.unpkg.com", {}, options());
 
     expect(result).toBe('import util from "./util?target=es2022";');
+  });
+});
+
+describe("transformSource", () => {
+  it("transforms TypeScript and replaces NODE_ENV", async () => {
+    let result = await transformSource(
+      "export const mode: string = process.env.NODE_ENV;",
+      "/src/index.ts",
+      options("target=es2017&env=development")
+    );
+
+    expect(result.code).toContain('const mode = "development";');
+  });
+
+  it("transforms JSX with the automatic runtime", async () => {
+    let result = await transformSource(
+      "export const view = <div />;",
+      "/src/index.jsx",
+      options("jsx=automatic&jsxImportSource=preact")
+    );
+
+    expect(result.code).toContain("preact/jsx-runtime");
+  });
+
+  it("minifies output when requested", async () => {
+    let result = await transformSource(
+      "export const value = 1 + 2;",
+      "/src/index.js",
+      options("min")
+    );
+
+    expect(result.code.trim()).toMatch(/^const \w=3;export\{\w as value\};$/);
   });
 });
 

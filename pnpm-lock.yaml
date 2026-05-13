@@ -63,6 +63,9 @@ importers:
       es-module-lexer:
         specifier: ^1.6.0
         version: 1.6.0
+      esbuild:
+        specifier: ^0.24.2
+        version: 0.24.2
       gunzip-maybe:
         specifier: ^1.4.2
         version: 1.4.2
