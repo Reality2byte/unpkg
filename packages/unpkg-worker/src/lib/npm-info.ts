@@ -20,6 +20,7 @@ export interface PackageInfo {
 export interface PackageJson {
   // See https://github.com/defunctzombie/package-browser-field-spec
   browser?: string | Record<string, string>;
+  css?: string;
   dependencies: Record<string, string>;
   description: string;
   devDependencies?: Record<string, string>;
@@ -32,6 +33,7 @@ export interface PackageJson {
   name: string;
   peerDependencies?: Record<string, string>;
   repository?: { url: string; type?: string; directory?: string };
+  style?: string;
   types?: string;
   typesVersions?: Record<string, Record<string, string[]>>;
   typings?: string;

@@ -2,6 +2,7 @@ import {
   getEsmPackageSubpath,
   getPackageInfo,
   normalizeEsmRequestUrl,
+  resolvePackageExport,
   resolvePackageVersion,
 } from "unpkg-worker";
 import type { EsmRequestError, PackageJson } from "unpkg-worker";
@@ -159,6 +160,29 @@ export async function handleRequest(request: Request, env: Env, context: Executi
     return serveRawFile(env, packageName, version, packagePath.filename ?? "/package.json");
   }
 
+  let cssPath = resolveCssPath(packageJson, packagePath.filename);
+  if (cssPath != null) {
+    if (packagePath.filename !== cssPath) {
+      return redirect(`/${packageName}@${version}${cssPath}${search}`, {
+        status: 301,
+        headers: corsHeaders({
+          "Cache-Control": moduleCacheControl,
+        }),
+      });
+    }
+
+    return searchParams.has("module")
+      ? serveCssModule(env, packageName, version, cssPath)
+      : serveRawFile(env, packageName, version, cssPath);
+  }
+  if (searchParams.has("css")) {
+    return jsonError({
+      code: "CSS_NOT_FOUND",
+      message: `Package CSS not found: ${packageName}@${version}${packagePath.filename ?? ""}`,
+      status: 404,
+    });
+  }
+
   let buildSearchParams = new URLSearchParams(searchParams);
   buildSearchParams.set("origin", normalized.url.origin);
   let buildResponse = await fetch(
@@ -304,6 +328,8 @@ async function serveRawFile(env: Env, packageName: string, version: string, file
   let headers = new Headers(rawResponse.headers);
   if (isTypeDeclarationPath(filename)) {
     headers.set("Content-Type", "application/typescript; charset=utf-8");
+  } else if (isCssPath(filename)) {
+    headers.set("Content-Type", "text/css; charset=utf-8");
   }
   for (let [name, value] of Object.entries(corsHeaders())) {
     headers.set(name, value);
@@ -314,6 +340,75 @@ async function serveRawFile(env: Env, packageName: string, version: string, file
     statusText: rawResponse.statusText,
     headers,
   });
+}
+
+async function serveCssModule(env: Env, packageName: string, version: string, filename: string): Promise<Response> {
+  let response = await serveRawFile(env, packageName, version, filename);
+  if (!response.ok) {
+    return response;
+  }
+
+  let css = await response.text();
+  let code = [
+    "/* esm.unpkg.com - css module */",
+    "const stylesheet = new CSSStyleSheet();",
+    `stylesheet.replaceSync(${JSON.stringify(css)});`,
+    "export default stylesheet;",
+    "",
+  ].join("\n");
+
+  return new Response(code, {
+    headers: corsHeaders({
+      "Cache-Control": moduleCacheControl,
+      "Content-Type": "application/javascript; charset=utf-8",
+    }),
+  });
+}
+
+function resolveCssPath(packageJson: PackageJson, filename: string | undefined): string | null {
+  if (filename != null && filename !== "/") {
+    if (isCssPath(filename)) {
+      return filename;
+    }
+
+    let resolved = resolvePackageExport(packageJson, filename, {
+      conditions: ["style", "css", "browser", "import", "default"],
+      useBrowserField: true,
+      useModuleField: false,
+    });
+    return resolved != null && isCssPath(resolved) ? resolved : null;
+  }
+
+  for (let candidate of [
+    getPackageJsonString(packageJson, "style"),
+    getPackageJsonString(packageJson, "css"),
+    getPackageJsonString(packageJson, "unpkg"),
+    resolvePackageExport(packageJson, "/", {
+      conditions: ["style", "css", "browser", "import", "default"],
+      useBrowserField: true,
+      useModuleField: false,
+    }),
+    packageJson.main,
+  ]) {
+    if (candidate != null && isCssPath(candidate)) {
+      return normalizePackageFilename(candidate);
+    }
+  }
+
+  return null;
+}
+
+function getPackageJsonString(packageJson: PackageJson, key: string): string | undefined {
+  let value = (packageJson as PackageJson & Record<string, unknown>)[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function normalizePackageFilename(filename: string): string {
+  return filename.replace(/^\.?\/*/, "/");
+}
+
+function isCssPath(filename: string): boolean {
+  return filename.endsWith(".css");
 }
 
 function getPackageTypesUrl(

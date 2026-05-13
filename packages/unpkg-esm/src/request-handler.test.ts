@@ -49,10 +49,32 @@ describe("handleRequest", () => {
       let url = new URL(request.url);
 
       if (url.origin === env.FILES_ORIGIN) {
+        if (url.pathname === "/file/normalize.css@8.0.1/normalize.css") {
+          return new Response("html { line-height: 1.15; }\n", {
+            headers: {
+              "Cache-Control": "public, max-age=31536000",
+              "Content-Length": "28",
+              "Content-Type": "text/css",
+            },
+          });
+        }
+
         return handleFilesRequest(request);
       }
 
       switch (url.href) {
+        case "https://registry.npmjs.org/normalize.css":
+          return Response.json({
+            name: "normalize.css",
+            "dist-tags": { latest: "8.0.1" },
+            versions: {
+              "8.0.1": {
+                name: "normalize.css",
+                version: "8.0.1",
+                main: "normalize.css",
+              },
+            },
+          });
         case "https://registry.npmjs.org/@types/react":
           return Response.json({
             name: "@types/react",
@@ -178,6 +200,46 @@ describe("handleRequest", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toMatch(/^application\/json/);
     expect(await response.text()).toMatch(/"name": "react"/);
+  });
+
+  it("redirects CSS package roots to their stylesheet entry", async () => {
+    let response = await dispatchFetch("https://esm.unpkg.com/normalize.css@8.0.1", {
+      redirect: "manual",
+    });
+
+    expect(response.status).toBe(301);
+    expect(response.headers.get("Location")).toBe("/normalize.css@8.0.1/normalize.css");
+  });
+
+  it("serves direct CSS files as stylesheets", async () => {
+    let response = await dispatchFetch("https://esm.unpkg.com/normalize.css@8.0.1/normalize.css");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("text/css; charset=utf-8");
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+    expect(await response.text()).toContain("line-height");
+  });
+
+  it("serves CSS files as constructable stylesheet modules", async () => {
+    let response = await dispatchFetch("https://esm.unpkg.com/normalize.css@8.0.1/normalize.css?module=");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+    let text = await response.text();
+    expect(text).toContain("new CSSStyleSheet()");
+    expect(text).toContain("export default stylesheet");
+  });
+
+  it("returns a diagnostic when an explicit CSS request has no stylesheet entry", async () => {
+    let response = await dispatchFetch("https://esm.unpkg.com/react@18.3.1?css=");
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Content-Type")).toBe("application/json");
+    expect(await response.json()).toMatchObject({
+      error: {
+        code: "CSS_NOT_FOUND",
+      },
+    });
   });
 
   it("serves declaration files without building them", async () => {

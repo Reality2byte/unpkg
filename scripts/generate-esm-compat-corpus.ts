@@ -5,6 +5,7 @@ import path from "node:path";
 
 interface PackageSeed {
   category: string;
+  cssRoot?: boolean;
   name: string;
   scenarios?: ScenarioName[];
 }
@@ -12,6 +13,9 @@ interface PackageSeed {
 type ScenarioName =
   | "browser-target"
   | "bundle"
+  | "css-module"
+  | "css-missing"
+  | "css-subpath"
   | "deps-react"
   | "dev"
   | "external-all"
@@ -31,7 +35,7 @@ type ScenarioName =
 interface CompatCase {
   category: string;
   description: string;
-  expect: "module" | "json" | "diagnostic";
+  expect: "module" | "json" | "css" | "diagnostic";
   features: string[];
   package: string;
   path: string;
@@ -55,6 +59,7 @@ const packageSeeds: PackageSeed[] = [
   { name: "@types/react", category: "types" },
   { name: "axios", category: "browser" },
   { name: "buffer", category: "node-builtin" },
+  { name: "bootstrap", category: "css", scenarios: ["css-subpath"] },
   { name: "chalk", category: "cjs" },
   { name: "classnames", category: "cjs" },
   { name: "clsx", category: "browser" },
@@ -96,6 +101,7 @@ const packageSeeds: PackageSeed[] = [
   { name: "moment", category: "cjs" },
   { name: "ms", category: "cjs" },
   { name: "nanoid", category: "browser", scenarios: ["browser-target", "node-target"] },
+  { name: "normalize.css", category: "css", cssRoot: true },
   { name: "path-browserify", category: "node-builtin" },
   { name: "preact", category: "framework", scenarios: ["jsx-runtime", "no-bundle", "worker"] },
   { name: "prop-types", category: "framework-peer" },
@@ -103,9 +109,11 @@ const packageSeeds: PackageSeed[] = [
   { name: "query-string", category: "browser" },
   { name: "ramda", category: "cjs" },
   { name: "react", category: "framework", scenarios: ["dev", "jsx-runtime", "node-target", "worker"] },
+  { name: "react", category: "css", scenarios: ["css-missing"] },
   { name: "react-dom", category: "framework-peer", scenarios: ["deps-react", "dev", "external-react"] },
   { name: "react-hook-form", category: "framework-peer", scenarios: ["deps-react", "external-react"] },
   { name: "react-is", category: "framework-peer" },
+  { name: "react-toastify", category: "css", scenarios: ["css-subpath", "css-module"] },
   { name: "react-redux", category: "framework-peer", scenarios: ["deps-react", "external-react"] },
   { name: "react-router", category: "framework-peer", scenarios: ["deps-react", "external-react"] },
   { name: "react-router-dom", category: "framework-peer", scenarios: ["deps-react", "external-react"] },
@@ -199,6 +207,20 @@ function createCase(seed: PackageSeed, version: string, scenario: ScenarioName):
       return moduleCase(seed, `Browser target for ${packageSpecifier}`, `${base}?target=es2020`, ["target"]);
     case "bundle":
       return moduleCase(seed, `Explicit bundle for ${packageSpecifier}`, `${base}?bundle`, ["bundle"]);
+    case "css-module":
+      return moduleCase(
+        seed,
+        `CSS module output for ${packageSpecifier}`,
+        `${base}/dist/ReactToastify.css?module`,
+        ["css", "css-module"]
+      );
+    case "css-missing":
+      return diagnosticCase(seed, `Explicit CSS request without a stylesheet for ${packageSpecifier}`, `${base}?css`, [
+        "css",
+        "css-not-found",
+      ]);
+    case "css-subpath":
+      return cssCase(seed, `Direct CSS file for ${packageSpecifier}`, getCssSubpath(seed, base), ["css", "subpath"]);
     case "deps-react":
       return moduleCase(seed, `React dependency override for ${packageSpecifier}`, `${base}?deps=react@18.3.1`, ["deps"]);
     case "dev":
@@ -222,7 +244,9 @@ function createCase(seed: PackageSeed, version: string, scenario: ScenarioName):
     case "raw-package-json":
       return jsonCase(seed, `Raw package.json for ${packageSpecifier}`, `${base}/package.json?raw`, ["raw"]);
     case "root":
-      return moduleCase(seed, `Package root for ${packageSpecifier}`, base, ["package-root"]);
+      return seed.cssRoot === true
+        ? cssCase(seed, `Package CSS root for ${packageSpecifier}`, base, ["css", "package-root"])
+        : moduleCase(seed, `Package root for ${packageSpecifier}`, base, ["package-root"]);
     case "sourcemap":
       return moduleCase(seed, `Source map output for ${packageSpecifier}`, `${base}?sourcemap`, ["sourcemap"]);
     case "standalone":
@@ -252,4 +276,26 @@ function jsonCase(seed: PackageSeed, description: string, casePath: string, feat
     package: seed.name,
     path: casePath,
   };
+}
+
+function cssCase(seed: PackageSeed, description: string, casePath: string, features: string[]): CompatCase {
+  return {
+    category: seed.category,
+    description,
+    expect: "css",
+    features,
+    package: seed.name,
+    path: casePath,
+  };
+}
+
+function getCssSubpath(seed: PackageSeed, base: string): string {
+  if (seed.name === "bootstrap") {
+    return `${base}/dist/css/bootstrap.min.css`;
+  }
+  if (seed.name === "react-toastify") {
+    return `${base}/dist/ReactToastify.css`;
+  }
+
+  return base;
 }

@@ -1,6 +1,6 @@
 # `esm.unpkg.com` esm.sh Compatibility
 
-This document tracks npm-package compatibility with `esm.sh`. Package registries other than npm and CSS transforms are intentionally out of scope for the current effort.
+This document tracks npm-package compatibility with `esm.sh`. Package registries other than npm are intentionally out of scope for the current effort.
 
 ## Compatibility Runner
 
@@ -39,7 +39,7 @@ Useful options:
 
 When either origin points at `localhost`, `127.0.0.1`, or `::1`, live runs check local service health before starting. If a local service becomes unreachable during the run, the runner restarts the appropriate default command and retries the failed case once. The managed commands are `pnpm vendor:esm-sh`, `pnpm --filter unpkg-esm dev`, and `pnpm --filter unpkg-files dev`.
 
-The built-in seed suite is also available as `scripts/esm-compat-corpus.seed.json`. It covers package roots, subpaths, `?deps`, `?alias`, `?external` shorthand, no-bundle mode, metadata, worker wrappers, runtime-native targets, and unsupported source diagnostics. The launch gate should expand this list with the agreed top-100 npm package set before `esm.unpkg.com` is promoted from beta.
+The built-in seed suite is also available as `scripts/esm-compat-corpus.seed.json`. It covers package roots, subpaths, CSS stylesheets, CSS modules, `?deps`, `?alias`, `?external` shorthand, no-bundle mode, metadata, worker wrappers, runtime-native targets, and unsupported source diagnostics. The launch gate should expand this list with the agreed top-100 npm package set before `esm.unpkg.com` is promoted from beta.
 
 For the broader path from the current representative suite to ecosystem-scale confidence, see [`esm-unpkg-ecosystem-compatibility-plan.md`](./esm-unpkg-ecosystem-compatibility-plan.md).
 For the launch decision checklist, see [`esm-unpkg-launch-readiness.md`](./esm-unpkg-launch-readiness.md).
@@ -86,7 +86,7 @@ The readiness summary checks compatibility pass rate, browser smoke pass rate, p
 | Common browser-compatible Node builtins | Supported | `process`, `buffer`, `events`, `util`, `path`, `url`, and `stream` rewrite to JSPM browser shims for browser targets. |
 | Hard Node-only builtins in browser output | Diagnostic | `fs`, `net`, `tls`, and `child_process` return clear build diagnostics for browser targets. |
 | Vue and Svelte single-file components | Diagnostic | `.vue` and `.svelte` return `415 Unsupported Media Type` until those transforms become launch requirements. |
-| CSS transforms | Excluded | Explicitly out of scope for now. |
+| CSS package files and CSS modules | Supported | Direct CSS files are served as `text/css`; `?module` returns a constructable `CSSStyleSheet` module; CSS package roots and subpaths redirect when package metadata identifies a stylesheet entry. |
 | Non-npm registries | Excluded | Explicitly out of scope. |
 
 ## Beta Launch Checklist

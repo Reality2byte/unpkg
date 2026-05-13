@@ -526,6 +526,11 @@ export function Home(): VNode {
                   <code class="text-sm bg-slate-100">?min</code>.
                 </li>
                 <li>
+                  <code class="text-sm bg-slate-100">?css</code> asks for a package stylesheet entry when the package
+                  exposes one, and <code class="text-sm bg-slate-100">?module</code> on a{" "}
+                  <code class="text-sm bg-slate-100">.css</code> file returns a constructable stylesheet module.
+                </li>
+                <li>
                   <code class="text-sm bg-slate-100">?worker</code> returns a small module that creates a{" "}
                   <code class="text-sm bg-slate-100">{"new Worker(url, { type: \"module\" })"}</code> for the resolved
                   module URL.
@@ -553,10 +558,26 @@ export function Home(): VNode {
               </div>
 
               <p class="mt-8">
-                The service currently focuses on npm packages and JavaScript module loading. CSS transformation is not
-                included yet; CSS side-effect imports are ignored in JavaScript builds so packages that include them can
-                still be loaded as modules.
+                Stylesheet packages and stylesheet files can be loaded from the same npm URLs. Direct{" "}
+                <code class="text-sm bg-slate-100">.css</code> files are served as CSS, package roots with stylesheet
+                metadata redirect to their stylesheet entry, and{" "}
+                <code class="text-sm bg-slate-100">?module</code> turns a CSS file into a constructable{" "}
+                <code class="text-sm bg-slate-100">CSSStyleSheet</code> module.
               </p>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  <link rel="stylesheet" href="https://esm.unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+
+                  <script type="module">
+                    import toastStyles from "https://esm.unpkg.com/react-toastify@11.0.5/dist/ReactToastify.css?module";
+
+                    document.adoptedStyleSheets = [...document.adoptedStyleSheets, toastStyles];
+                  </script>
+                `}
+                </CodeBlock>
+              </div>
             </section>
 
             <section id="metadata-api">

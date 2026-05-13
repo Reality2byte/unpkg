@@ -2,8 +2,8 @@
   "name": "ecosystem",
   "description": "Version-pinned npm package scenarios for ecosystem-scale esm.sh compatibility measurement.",
   "generatedAt": "2026-05-13T00:58:08.197Z",
-  "packageCount": 101,
-  "scenarioCount": 375,
+  "packageCount": 104,
+  "scenarioCount": 380,
   "cases": [
     {
       "category": "cjs",
@@ -3757,6 +3757,61 @@
       ],
       "package": "date-fns-tz",
       "path": "/date-fns-tz@3.2.0/package.json?raw"
+    },
+    {
+      "category": "css",
+      "description": "Package CSS root for normalize.css@8.0.1",
+      "expect": "css",
+      "features": [
+        "css",
+        "package-root"
+      ],
+      "package": "normalize.css",
+      "path": "/normalize.css@8.0.1"
+    },
+    {
+      "category": "css",
+      "description": "Direct CSS file for bootstrap@5.3.8",
+      "expect": "css",
+      "features": [
+        "css",
+        "subpath"
+      ],
+      "package": "bootstrap",
+      "path": "/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    },
+    {
+      "category": "css",
+      "description": "Direct CSS file for react-toastify@11.0.5",
+      "expect": "css",
+      "features": [
+        "css",
+        "subpath"
+      ],
+      "package": "react-toastify",
+      "path": "/react-toastify@11.0.5/dist/ReactToastify.css"
+    },
+    {
+      "category": "css",
+      "description": "CSS module output for react-toastify@11.0.5",
+      "expect": "module",
+      "features": [
+        "css",
+        "css-module"
+      ],
+      "package": "react-toastify",
+      "path": "/react-toastify@11.0.5/dist/ReactToastify.css?module"
+    },
+    {
+      "category": "css",
+      "description": "Explicit CSS request without a stylesheet for react@18.3.1",
+      "expect": "diagnostic",
+      "features": [
+        "css",
+        "css-not-found"
+      ],
+      "package": "react",
+      "path": "/react@18.3.1?css"
     }
   ]
 }

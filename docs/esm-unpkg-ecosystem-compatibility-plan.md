@@ -2,7 +2,7 @@
 
 This document describes the work needed to move `esm.unpkg.com` from a promising first implementation to ecosystem-scale compatibility with esm.sh for npm packages.
 
-The target is not byte-for-byte output parity. The target is behavioral compatibility: npm package URLs that work on esm.sh should work on `esm.unpkg.com` with equivalent browser/runtime behavior, equivalent query semantics, useful metadata, and clear diagnostics for intentional exclusions. Non-npm registries and CSS transforms remain outside the current scope.
+The target is not byte-for-byte output parity. The target is behavioral compatibility: npm package URLs that work on esm.sh should work on `esm.unpkg.com` with equivalent browser/runtime behavior, equivalent query semantics, useful metadata, CSS package handling, and clear diagnostics for intentional exclusions. Non-npm registries remain outside the current scope.
 
 ## Compatibility Definition
 

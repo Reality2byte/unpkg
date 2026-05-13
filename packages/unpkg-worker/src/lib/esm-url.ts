@@ -83,7 +83,7 @@ export function normalizeEsmRequestUrl(requestUrl: string | URL): NormalizedEsmR
     return validationError;
   }
 
-  if (!url.searchParams.has("target") && !url.searchParams.has("raw")) {
+  if (!url.searchParams.has("target") && !url.searchParams.has("raw") && !isCssRequest(packagePath, url.searchParams)) {
     url.searchParams.set("target", "es2022");
   }
 
@@ -97,6 +97,14 @@ export function normalizeEsmRequestUrl(requestUrl: string | URL): NormalizedEsmR
     target: url.searchParams.get("target") ?? "raw",
     url,
   };
+}
+
+function isCssRequest(packagePath: EsmPackagePath, searchParams: URLSearchParams): boolean {
+  return (
+    searchParams.has("css") ||
+    packagePath.package.endsWith(".css") ||
+    packagePath.filename?.endsWith(".css") === true
+  );
 }
 
 export function parseEsmPackagePathname(pathname: string): EsmPackagePath | null {

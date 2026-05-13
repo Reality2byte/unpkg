@@ -66,6 +66,16 @@ describe("normalizeEsmRequestUrl", () => {
 
     expect("url" in result && result.url.search).toBe("?raw=");
   });
+
+  it("does not add a default target to CSS requests", () => {
+    let directCss = normalizeEsmRequestUrl("https://esm.unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css");
+    let cssPackage = normalizeEsmRequestUrl("https://esm.unpkg.com/normalize.css@8.0.1");
+    let cssModule = normalizeEsmRequestUrl("https://esm.unpkg.com/react-toastify@11.0.5/dist/ReactToastify.css?module");
+
+    expect("url" in directCss && directCss.url.search).toBe("");
+    expect("url" in cssPackage && cssPackage.url.search).toBe("");
+    expect("url" in cssModule && cssModule.url.search).toBe("?module=");
+  });
 });
 
 describe("getEsmPackageSubpath", () => {

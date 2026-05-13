@@ -2,7 +2,7 @@
 
 import { readFile } from "node:fs/promises";
 
-type ExpectedBehavior = "module" | "json" | "redirect" | "diagnostic";
+type ExpectedBehavior = "module" | "json" | "css" | "redirect" | "diagnostic";
 type FailureCategory =
   | "content-type-mismatch"
   | "diagnostic"
@@ -556,6 +556,13 @@ function validateExpectedBehavior(
     };
   }
 
+  if (compatCase.expect === "css" && !isCss(esmUnpkg.contentType)) {
+    return {
+      failureCategory: "content-type-mismatch",
+      reason: `expected CSS from esm.unpkg.com, got ${esmUnpkg.contentType ?? "missing content type"}`,
+    };
+  }
+
   if (compatCase.expect === "module" && !isJavaScript(esmUnpkg.contentType)) {
     return {
       failureCategory: "content-type-mismatch",
@@ -774,6 +781,7 @@ function isCompatCase(value: unknown): value is CompatCase {
     typeof compatCase.path === "string" &&
     (compatCase.expect === "module" ||
       compatCase.expect === "json" ||
+      compatCase.expect === "css" ||
       compatCase.expect === "redirect" ||
       compatCase.expect === "diagnostic")
   );
@@ -824,6 +832,10 @@ function isJson(contentType: string | null): boolean {
 
 function isTypeScript(contentType: string | null): boolean {
   return contentType?.includes("application/typescript") ?? false;
+}
+
+function isCss(contentType: string | null): boolean {
+  return contentType?.includes("text/css") ?? false;
 }
 
 function isJavaScript(contentType: string | null): boolean {

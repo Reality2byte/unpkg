@@ -2,7 +2,7 @@
 
 This checklist is the decision record for moving `esm.unpkg.com` from draft implementation to beta, and from beta to a public esm.sh-compatible claim for npm packages.
 
-The compatibility claim should be based on measured behavior, not on implementation completeness. Non-npm registries and CSS transforms remain intentional exclusions.
+The compatibility claim should be based on measured behavior, not on implementation completeness. Non-npm registries remain an intentional exclusion.
 
 ## Required Reports
 

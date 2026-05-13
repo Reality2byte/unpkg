@@ -2,12 +2,11 @@
 
 ## Overview
 
-`esm.unpkg.com` is an npm-only ESM transformation service for UNPKG. It serves packages from npm as browser-ready ES modules, with on-demand transformation, dependency rewriting, configurable bundling, TypeScript/JSX transforms, metadata, and cacheable build artifacts.
+`esm.unpkg.com` is an npm-only ESM transformation service for UNPKG. It serves packages from npm as browser-ready ES modules and stylesheet files, with on-demand transformation, dependency rewriting, configurable bundling, TypeScript/JSX transforms, CSS module support, metadata, and cacheable build artifacts.
 
-The service should strive for esm.sh compatibility for npm packages. A URL that works on esm.sh for an npm package should either work the same way on `esm.unpkg.com` or fail with a documented, intentional limitation. There are two explicit initial exclusions:
+The service should strive for esm.sh compatibility for npm packages. A URL that works on esm.sh for an npm package should either work the same way on `esm.unpkg.com` or fail with a documented, intentional limitation. There is one explicit initial exclusion:
 
 - Non-npm registries are out of scope.
-- CSS handling is out of scope.
 
 The primary goal is to let developers import npm packages directly in modern browsers without local install or build tooling:
 
@@ -34,14 +33,13 @@ Required compatibility targets:
 - npm package root imports, version ranges, dist-tags, and subpath imports;
 - `?target`, `?dev`, `?deps`, `?alias`, `?external`, `?bundle=false`, `?no-bundle`, `?standalone`, `?raw`, `?exports`, `?conditions`, `?keep-names`, `?ignore-annotations`, `?no-dts`, `?meta`, and `?worker`;
 - import-map workflows where externalized dependencies remain bare specifiers;
-- TypeScript, JSX, and TSX source transforms;
+- TypeScript, JSX, TSX, CSS file, and CSS module behavior;
 - browser-compatible handling of common Node builtins;
 - SRI-compatible integrity values in metadata.
 
-Intentional compatibility exclusions:
+Intentional compatibility exclusion:
 
 - Non-npm registry paths such as `/jsr/`, `/gh/`, `/pr/`, and `/pkg.pr.new/`.
-- CSS features such as `?css` and JS-imported CSS rewriting.
 
 Deferred compatibility items:
 
@@ -56,7 +54,6 @@ When compatibility is not possible in the first release, the service should retu
 ## Non-Goals
 
 - No JSR, GitHub, pkg.pr.new, or other non-npm package registries in the initial release.
-- No CSS import rewriting, extraction, or `?css` behavior in the initial release.
 - No IE11 or legacy non-module browser support.
 - No private npm package support unless a future UNPKG product explicitly adds authenticated registry access.
 - No guarantee of exact Node.js runtime semantics for browser output.
@@ -242,6 +239,21 @@ Rules:
 - Raw mode is mutually exclusive with transform flags such as `?bundle`, `?standalone`, `?target`, `?min`, `?jsx`, and `?exports`.
 - Raw mode may still use package/version resolution and redirects.
 - Raw responses should preserve the file's content type where known.
+
+### CSS Stylesheets
+
+```txt
+?css
+?module
+```
+
+The service should follow esm.sh's npm CSS behavior:
+
+- Direct `.css` package files are served as `text/css` with CORS headers.
+- Package roots or subpaths that resolve to CSS through package metadata redirect to the concrete stylesheet file.
+- `?css` requests ask for a stylesheet entry without adding JavaScript transform defaults.
+- `?module` on a CSS file returns a JavaScript module that exports a constructable `CSSStyleSheet`.
+- JavaScript builds may ignore CSS side-effect imports when the bundler cannot inline or rewrite them safely, matching esm.sh's browser-module emphasis without failing otherwise valid packages.
 
 ### JSX and TypeScript
 
@@ -604,7 +616,7 @@ Public docs must include:
 - standalone bundle examples;
 - TypeScript declaration behavior;
 - `?meta` examples with integrity;
-- limitations, including no non-npm registries and no CSS support in the initial release;
+- limitations, including no non-npm registries;
 - an esm.sh compatibility table that separates supported, deferred, and intentionally unsupported features.
 
 ## Test Plan
@@ -766,11 +778,12 @@ Tasks:
 
 1. Add CJS-to-ESM transformation.
 2. Add `.ts`, `.tsx`, and `.jsx` transforms.
-3. Implement browser `?target`, `?dev`, `?env`, `?min`, and `?sourcemap`.
-4. Implement `?keep-names` and `?ignore-annotations`.
-5. Implement `?exports` for modules where export selection is safe.
-6. Return clear `415` diagnostics for CSS, Vue, Svelte, and other unsupported source formats.
-7. Return clear `422` diagnostics for transform failures.
+3. Add CSS stylesheet serving and CSS module output.
+4. Implement browser `?target`, `?dev`, `?env`, `?min`, and `?sourcemap`.
+5. Implement `?keep-names` and `?ignore-annotations`.
+6. Implement `?exports` for modules where export selection is safe.
+7. Return clear `415` diagnostics for Vue, Svelte, and other unsupported source formats.
+8. Return clear `422` diagnostics for transform failures.
 
 Exit criteria:
 
