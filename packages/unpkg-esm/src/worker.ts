@@ -7,7 +7,9 @@ const cache = caches.default as Cache;
 export default {
   async fetch(request, env, context) {
     try {
-      let shouldUseCache = env.MODE !== "development" && env.MODE !== "test";
+      let url = new URL(request.url);
+      let shouldUseCache =
+        env.MODE !== "development" && env.MODE !== "test" && url.pathname !== "/" && url.pathname !== "/index.html";
       let response = shouldUseCache ? await cache.match(request) : undefined;
 
       if (!response) {
