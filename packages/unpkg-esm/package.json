@@ -1,0 +1,23 @@
+{
+  "name": "unpkg-esm",
+  "description": "The ESM package import service for UNPKG",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "unpkg-worker": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250320.0",
+    "@types/bun": "^1.2.8",
+    "@types/node": "^22.10.2",
+    "unpkg-files": "workspace:*",
+    "wrangler": "^4.3.0"
+  },
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir=dist",
+    "dev": "wrangler dev --env dev --port 3002",
+    "test": "bun --preload=./test/setup.ts test",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging"
+  }
+}

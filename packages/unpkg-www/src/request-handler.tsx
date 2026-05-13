@@ -19,12 +19,14 @@ import { Home } from "./components/home.tsx";
 const publicNpmRegistry = "https://registry.npmjs.org";
 
 export async function handleRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
+  let url = new URL(request.url);
+
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
-        Allow: "GET, HEAD, OPTIONS",
+        Allow: "GET, HEAD, OPTIONS, POST",
         "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS, POST",
         "Access-Control-Allow-Origin": "*",
       },
     });
@@ -35,11 +37,10 @@ export async function handleRequest(request: Request, env: Env, context: Executi
     });
   }
 
-  let url = new URL(request.url);
-
   if (url.pathname === "/_health") {
     return new Response("OK");
   }
+
   if (url.pathname === "/favicon.ico") {
     return notFound();
   }
@@ -47,7 +48,7 @@ export async function handleRequest(request: Request, env: Env, context: Executi
     return redirect("/", 301);
   }
   if (url.pathname === "/") {
-    return renderPage(env, <Home />, {
+    return renderPage(env, <Home esmOrigin={env.ESM_ORIGIN} origin={env.ORIGIN} />, {
       headers: {
         "Cache-Control": env.DEV ? "no-store" : "public, max-age=60, s-maxage=300",
       },
@@ -267,7 +268,6 @@ export async function handleRequest(request: Request, env: Env, context: Executi
 
   return notFound(`Not found: ${url.pathname}${url.search}`);
 }
-
 function notFound(message?: string, init?: ResponseInit): Response {
   return new Response(message ?? "Not Found", { status: 404, ...init });
 }

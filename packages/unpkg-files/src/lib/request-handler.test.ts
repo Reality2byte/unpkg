@@ -151,4 +151,56 @@ describe("handleRequest", () => {
       expect(response.status).toBe(404);
     });
   });
+
+  describe("/build requests", () => {
+    it("builds a no-bundle ESM artifact for a JavaScript file", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/build/preact@10.26.4/src/component.js?no-bundle&target=es2022");
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+      expect(response.headers.get("Cache-Control")).toBe("public, max-age=60, s-maxage=300");
+      expect(response.headers.has("X-UNPKG-Build-Key")).toBe(true);
+      expect(response.headers.get("X-UNPKG-Build-Input")).toBe("/src/component.js");
+      expect(await response.text()).toContain('from "./util?target=es2022";');
+    });
+
+    it("bundles package-internal imports by default", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/build/preact@10.26.4/src/component.js?target=es2022");
+      expect(response.status).toBe(200);
+      let text = await response.text();
+      expect(text).toContain("// unpkg-package:/src/util");
+      expect(text).not.toContain('from "./util?target=es2022";');
+    });
+
+    it("resolves package roots before building", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/build/preact@10.26.4?target=es2022");
+      expect(response.status).toBe(200);
+      expect(response.headers.get("X-UNPKG-Build-Input")).toBe("/dist/preact.module.js");
+    });
+
+    it("returns 404 when the build input does not exist", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/build/preact@10.26.4/missing.js?target=es2022");
+      expect(response.status).toBe(404);
+    });
+
+    it("returns 415 for unsupported source types", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/build/preact@10.26.4/component.vue?target=es2022");
+      expect(response.status).toBe(415);
+    });
+  });
+
+  describe("/transform requests", () => {
+    it("transforms inline TSX source", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/transform?target=es2022&jsx=automatic&external=*", {
+        method: "POST",
+        body: JSON.stringify({
+          filename: "/inline.tsx",
+          source: "export const view: JSX.Element = <div />;",
+        }),
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+      expect(await response.text()).toContain('from "react/jsx-runtime";');
+    });
+  });
 });

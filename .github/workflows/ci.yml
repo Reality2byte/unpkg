@@ -51,3 +51,47 @@ jobs:
 
       - name: Test packages
         run: pnpm -r test
+
+      - name: Install Playwright browser
+        run: pnpm --filter unpkg-scripts exec playwright install --with-deps chromium
+
+      - name: Test ESM smoke suites
+        env:
+          ESM_UNPKG_ORIGIN: http://localhost:3002
+        run: |
+          set -euo pipefail
+
+          (cd packages/unpkg-files && MODE=development bun --port 4000 ./src/server.ts) > /tmp/unpkg-files.log 2>&1 &
+          files_pid=$!
+          (cd packages/unpkg-esm && ./node_modules/.bin/wrangler dev --env dev --port 3002 --ip 127.0.0.1) > /tmp/unpkg-esm.log 2>&1 &
+          esm_pid=$!
+
+          cleanup() {
+            kill "$esm_pid" "$files_pid" 2>/dev/null || true
+            wait "$esm_pid" "$files_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          for url in http://localhost:4000/_health http://localhost:3002/_health; do
+            for attempt in {1..60}; do
+              if curl --silent --fail "$url" >/dev/null; then
+                break
+              fi
+
+              if [ "$attempt" -eq 60 ]; then
+                echo "Timed out waiting for $url"
+                echo "::group::unpkg-files log"
+                cat /tmp/unpkg-files.log || true
+                echo "::endgroup::"
+                echo "::group::unpkg-esm log"
+                cat /tmp/unpkg-esm.log || true
+                echo "::endgroup::"
+                exit 1
+              fi
+
+              sleep 1
+            done
+          done
+
+          pnpm test:esm-compat -- --corpus scripts/esm-compat-corpus.seed.json --skip-baseline --no-restart-local-services --concurrency 4
+          pnpm test:esm-browser -- --corpus scripts/esm-compat-corpus.seed.json --origin http://localhost:3002 --limit 100

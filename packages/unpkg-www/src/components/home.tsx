@@ -4,14 +4,17 @@ import { CodeBlock } from "./code-block.tsx";
 import { HomeNav } from "./home-nav.tsx";
 import { Hydrate } from "./hydrate.tsx";
 
-export function Home(): VNode {
+export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string }): VNode {
   let navItems = {
     overview: "Overview",
     "nobuild-apps": "Nobuild Apps",
+    "browser-modules": "Browser Modules",
     "metadata-api": "Metadata API",
     "cache-performance": "Cache Performance",
     about: "About",
   };
+  let url = (pathname: string): string => new URL(pathname, origin).href;
+  let esmUrl = (pathname: string): string => new URL(pathname, esmOrigin).href;
 
   return (
     <Fragment>
@@ -33,7 +36,7 @@ export function Home(): VNode {
 
               <p class="mt-12 p-4 text-center bg-slate-100">
                 <code class="text-sm sm:hidden">unpkg.com/:pkg@:ver/:file</code>
-                <code class="text-sm hidden sm:block">https://unpkg.com/:package@:version/:file</code>
+                <code class="text-sm hidden sm:block">{url("/:package@:version/:file")}</code>
               </p>
 
               <ul class="mt-12 ml-6 list-disc list-outside">
@@ -378,6 +381,205 @@ export function Home(): VNode {
                 No bundler required! This is ideal for small projects, prototypes, or any situation where you'd like to
                 get something up and running quickly without setting up a build pipeline.
               </p>
+            </section>
+
+            <section id="browser-modules">
+              <SectionHeading id="browser-modules">Browser Modules</SectionHeading>
+
+              <p class="mt-4">
+                For packages that are not already published as browser-ready ESM files, use{" "}
+                <a class="text-blue-600 hover:underline" href={esmUrl("/")}>
+                  esm.unpkg.com
+                </a>
+                . This subdomain resolves npm packages, transforms TypeScript and JSX when needed, bundles package
+                internals, rewrites dependency imports to permanent UNPKG URLs, and returns modules that can be loaded
+                directly in modern browsers.
+              </p>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  <script type="module">
+                    import React from "https://esm.unpkg.com/react@18.3.1";
+                    import { createRoot } from "https://esm.unpkg.com/react-dom@18.3.1/client";
+
+                    createRoot(document.getElementById("root")).render(
+                      React.createElement("h1", null, "Hello from esm.unpkg.com")
+                    );
+                  </script>
+                `}
+                </CodeBlock>
+              </div>
+
+              <p class="mt-8">
+                The URL format is the same package URL style you use on UNPKG, but on the{" "}
+                <code class="text-sm bg-slate-100">esm.unpkg.com</code> subdomain:
+              </p>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  https://esm.unpkg.com/:package@:version/:subpath
+                `}
+                </CodeBlock>
+              </div>
+
+              <p class="mt-8">
+                Versions may be exact versions, npm dist-tags, or semver ranges. If you omit the version, the{" "}
+                <code class="text-sm bg-slate-100">latest</code> tag is used. Requests redirect to a normalized,
+                version-pinned URL so generated module imports are stable and cacheable.
+              </p>
+
+              <ul class="mt-4 ml-6 list-disc list-outside">
+                <li>
+                  <a class="text-blue-600 hover:underline break-all" href={esmUrl("/preact")}>
+                    esm.unpkg.com/preact
+                  </a>
+                </li>
+                <li>
+                  <a class="text-blue-600 hover:underline break-all" href={esmUrl("/react-dom@18/client")}>
+                    esm.unpkg.com/react-dom@18/client
+                  </a>
+                </li>
+                <li>
+                  <a class="text-blue-600 hover:underline break-all" href={esmUrl("/@floating-ui/dom@1")}>
+                    esm.unpkg.com/@floating-ui/dom@1
+                  </a>
+                </li>
+              </ul>
+
+              <p class="mt-8">
+                By default, esm.unpkg.com targets modern browsers with{" "}
+                <code class="text-sm bg-slate-100">target=es2022</code>, uses production mode, bundles internal package
+                files, leaves dependency packages as rewritten imports, and attaches TypeScript declaration metadata
+                when it can find it.
+              </p>
+
+              <p class="mt-8">The following query parameters are available:</p>
+
+              <ul class="mt-4 ml-6 list-disc list-outside">
+                <li>
+                  <code class="text-sm bg-slate-100">?target=...</code> chooses the output/runtime target. Supported
+                  values are <code class="text-sm bg-slate-100">es2015</code> through{" "}
+                  <code class="text-sm bg-slate-100">es2024</code>,{" "}
+                  <code class="text-sm bg-slate-100">esnext</code>,{" "}
+                  <code class="text-sm bg-slate-100">node</code>,{" "}
+                  <code class="text-sm bg-slate-100">deno</code>, and{" "}
+                  <code class="text-sm bg-slate-100">denonext</code>.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?dev</code> or{" "}
+                  <code class="text-sm bg-slate-100">?env=development</code> builds with development conditions and
+                  replaces <code class="text-sm bg-slate-100">process.env.NODE_ENV</code> with{" "}
+                  <code class="text-sm bg-slate-100">"development"</code>. The default is{" "}
+                  <code class="text-sm bg-slate-100">env=production</code>.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?conditions=...</code> adds custom package export conditions. You
+                  may pass a comma-separated list or repeat the parameter.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?deps=react@18.3.1,react-dom@18.3.1</code> overrides dependency
+                  versions used when rewriting imports.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?alias=react:preact/compat,react-dom:preact/compat</code> rewrites
+                  package specifiers to alternate packages or subpaths.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?external=react,react-dom</code> leaves matching dependencies as
+                  bare imports. Use <code class="text-sm bg-slate-100">?external=*</code> to externalize all
+                  dependencies, or use the shorthand <code class="text-sm bg-slate-100">/*pkg</code> form, such as{" "}
+                  <code class="text-sm bg-slate-100">https://esm.unpkg.com/*swr@2</code>.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?bundle</code> bundles package dependencies,{" "}
+                  <code class="text-sm bg-slate-100">?standalone</code> carries standalone bundling through rewritten
+                  dependency imports, and <code class="text-sm bg-slate-100">?no-bundle</code> or{" "}
+                  <code class="text-sm bg-slate-100">?bundle=false</code> disables bundling.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?jsx=automatic</code>,{" "}
+                  <code class="text-sm bg-slate-100">?jsx=react</code>, or{" "}
+                  <code class="text-sm bg-slate-100">?jsx=preact</code> selects JSX transform mode. Use{" "}
+                  <code class="text-sm bg-slate-100">?jsxImportSource=...</code> with automatic JSX runtimes.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?min</code> minifies output,{" "}
+                  <code class="text-sm bg-slate-100">?sourcemap</code> emits an inline source map,{" "}
+                  <code class="text-sm bg-slate-100">?keep-names</code> preserves function and class names, and{" "}
+                  <code class="text-sm bg-slate-100">?ignore-annotations</code> asks the bundler to ignore package
+                  tree-shaking annotations.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?no-dts</code> suppresses the{" "}
+                  <code class="text-sm bg-slate-100">X-TypeScript-Types</code> response header when declaration files
+                  are available.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?meta</code> returns JSON metadata for the resolved module,
+                  including dependency information, export subpaths, target, bundle mode, types URL, and integrity.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?raw</code> serves the raw package file without transforming it.
+                  Raw mode is for file inspection and cannot be combined with build options like{" "}
+                  <code class="text-sm bg-slate-100">?target</code>,{" "}
+                  <code class="text-sm bg-slate-100">?bundle</code>, or{" "}
+                  <code class="text-sm bg-slate-100">?min</code>.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?css</code> asks for a package stylesheet entry when the package
+                  exposes one, and <code class="text-sm bg-slate-100">?module</code> on a{" "}
+                  <code class="text-sm bg-slate-100">.css</code> file returns a constructable stylesheet module.
+                </li>
+                <li>
+                  <code class="text-sm bg-slate-100">?worker</code> returns a small module that creates a{" "}
+                  <code class="text-sm bg-slate-100">{"new Worker(url, { type: \"module\" })"}</code> for the resolved
+                  module URL.
+                </li>
+              </ul>
+
+              <p class="mt-8">
+                esm.unpkg.com also provides <code class="text-sm bg-slate-100">/run</code> and{" "}
+                <code class="text-sm bg-slate-100">/tsx</code> helper modules. These scan the page for inline scripts
+                such as <code class="text-sm bg-slate-100">text/tsx</code>, transform them through esm.unpkg.com, and
+                insert executable module scripts.
+              </p>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  <script type="module" src="https://esm.unpkg.com/tsx"></script>
+                  <script type="text/tsx" data-jsx="automatic">
+                    import { createRoot } from "react-dom/client";
+
+                    createRoot(document.getElementById("root")).render(<h1>Hello!</h1>);
+                  </script>
+                `}
+                </CodeBlock>
+              </div>
+
+              <p class="mt-8">
+                Stylesheet packages and stylesheet files can be loaded from the same npm URLs. Direct{" "}
+                <code class="text-sm bg-slate-100">.css</code> files are served as CSS, package roots with stylesheet
+                metadata redirect to their stylesheet entry, and{" "}
+                <code class="text-sm bg-slate-100">?module</code> turns a CSS file into a constructable{" "}
+                <code class="text-sm bg-slate-100">CSSStyleSheet</code> module.
+              </p>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  <link rel="stylesheet" href="https://esm.unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+
+                  <script type="module">
+                    import toastStyles from "https://esm.unpkg.com/react-toastify@11.0.5/dist/ReactToastify.css?module";
+
+                    document.adoptedStyleSheets = [...document.adoptedStyleSheets, toastStyles];
+                  </script>
+                `}
+                </CodeBlock>
+              </div>
             </section>
 
             <section id="metadata-api">

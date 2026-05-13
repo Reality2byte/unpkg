@@ -10,6 +10,7 @@ const env: Env = {
   APP_ORIGIN: "https://app.unpkg.com",
   ASSETS_ORIGIN: "https://unpkg.com",
   DEV: false,
+  ESM_ORIGIN: "https://esm.unpkg.com",
   FILES_ORIGIN: "https://files.unpkg.com",
   MODE: "test",
   ORIGIN: "https://unpkg.com",
@@ -83,6 +84,28 @@ describe("handleRequest", () => {
   afterAll(() => {
     if (globalCaches) globalThis.caches = globalCaches;
     if (globalFetch) globalThis.fetch = globalFetch;
+  });
+
+  it("renders home page links with configured staging origins", async () => {
+    let stagingEnv: Env = {
+      ...env,
+      APP_ORIGIN: "https://app.unpkg.dev",
+      ASSETS_ORIGIN: "https://unpkg.dev",
+      ESM_ORIGIN: "https://esm.unpkg.dev",
+      FILES_ORIGIN: "https://fly.unpkg.dev",
+      MODE: "test",
+      ORIGIN: "https://unpkg.dev",
+    };
+    let response = await handleRequest(new Request("https://unpkg.dev/"), stagingEnv, context);
+    let html = await response.text();
+
+    expect(html).toContain('href="https://esm.unpkg.dev/"');
+    expect(html).toContain('href="https://esm.unpkg.dev/preact"');
+    expect(html).toContain('href="https://esm.unpkg.dev/react-dom@18/client"');
+    expect(html).toContain(">esm.unpkg.com/preact<");
+    expect(html).toContain(">esm.unpkg.com/react-dom@18/client<");
+    expect(html).not.toContain("react@18/client");
+    expect(html).not.toContain('href="https://esm.unpkg.com/');
   });
 
   describe("file requests", () => {

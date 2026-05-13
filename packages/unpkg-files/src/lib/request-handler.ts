@@ -3,6 +3,14 @@ import type { PackageFileListing } from "unpkg-worker";
 
 import { env } from "./env.ts";
 import {
+  buildEsmModule,
+  normalizeBuildOptions,
+  transformInlineEsmModule,
+  UnsupportedDynamicRequireError,
+  UnsupportedNodeBuiltinError,
+  UnsupportedSourceTypeError,
+} from "./esm-build-service.ts";
+import {
   getFile,
   listFiles,
   PackageNotFoundError,
@@ -34,18 +42,19 @@ export async function handleRequest(request: Request): Promise<Response> {
 }
 
 async function handleRequest_(request: Request): Promise<Response> {
+  let url = new URL(request.url);
+  let isInlineTransformRequest = url.pathname === "/transform" && request.method === "POST";
+
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
-        Allow: "GET, HEAD, OPTIONS",
+        Allow: "GET, HEAD, OPTIONS, POST",
       },
     });
   }
-  if (request.method !== "GET" && request.method !== "HEAD") {
+  if (request.method !== "GET" && request.method !== "HEAD" && !isInlineTransformRequest) {
     return new Response(`Invalid request method: ${request.method}`, { status: 405 });
   }
-
-  let url = new URL(request.url);
 
   if (url.pathname === "/_health") {
     return new Response("OK");
@@ -55,6 +64,53 @@ async function handleRequest_(request: Request): Promise<Response> {
   }
 
   try {
+    if (isInlineTransformRequest) {
+      let body = await readInlineTransformRequest(request);
+      if ("response" in body) {
+        return body.response;
+      }
+
+      let result = await transformInlineEsmModule(publicNpmRegistry, {
+        filename: body.filename,
+        source: body.source,
+        options: normalizeBuildOptions(url.searchParams),
+      });
+
+      return new Response(result.code, {
+        headers: result.headers,
+      });
+    }
+
+    if (url.pathname.startsWith("/build")) {
+      let parsed = parsePackagePathname(url.pathname.slice(6));
+      if (parsed == null) {
+        return notFound(`Invalid build pathname: ${url.pathname}`);
+      }
+
+      let { package: packageName, version, filename } = parsed;
+
+      if (version == null) {
+        return notFound(`Missing version in pathname: ${url.pathname}`);
+      }
+      if (semver.clean(version) !== version) {
+        return notFound(`Invalid version: ${version}`);
+      }
+
+      let result = await buildEsmModule(publicNpmRegistry, {
+        packageName,
+        version,
+        filename,
+        options: normalizeBuildOptions(url.searchParams),
+      });
+      if (result == null) {
+        return notFound(`Build input not found: ${url.pathname}`);
+      }
+
+      return new Response(result.code, {
+        headers: result.headers,
+      });
+    }
+
     if (url.pathname.startsWith("/file")) {
       let parsed = parsePackagePathname(url.pathname.slice(5));
       if (parsed == null) {
@@ -132,11 +188,58 @@ async function handleRequest_(request: Request): Promise<Response> {
         status: 504,
       });
     }
+    if (error instanceof UnsupportedNodeBuiltinError) {
+      return new Response(error.message, {
+        status: 422,
+      });
+    }
+    if (error instanceof UnsupportedSourceTypeError) {
+      return new Response(error.message, {
+        status: 415,
+      });
+    }
+    if (error instanceof UnsupportedDynamicRequireError) {
+      return new Response(error.message, {
+        status: 422,
+      });
+    }
 
     throw error;
   }
 
   return notFound(`Not found: ${url.pathname}${url.search}`);
+}
+
+async function readInlineTransformRequest(request: Request): Promise<
+  | {
+      filename: string;
+      source: string;
+    }
+  | { response: Response }
+> {
+  let value: unknown;
+  try {
+    value = await request.json();
+  } catch {
+    return { response: new Response("Invalid JSON request body", { status: 400 }) };
+  }
+
+  if (typeof value !== "object" || value == null) {
+    return { response: new Response("Invalid transform request body", { status: 400 }) };
+  }
+
+  let body = value as Record<string, unknown>;
+  if (typeof body.source !== "string") {
+    return { response: new Response("Missing source in transform request body", { status: 400 }) };
+  }
+  if (body.filename != null && typeof body.filename !== "string") {
+    return { response: new Response("Invalid filename in transform request body", { status: 400 }) };
+  }
+
+  return {
+    filename: body.filename ?? "/inline.tsx",
+    source: body.source,
+  };
 }
 
 function notFound(message?: string, init?: ResponseInit): Response {

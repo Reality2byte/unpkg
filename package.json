@@ -9,7 +9,13 @@
   "scripts": {
     "build": "pnpm -r run build",
     "clean": "git clean -fdX .",
+    "clean:reports": "node -e \"fs.rmSync('.reports', { recursive: true, force: true }); fs.mkdirSync('.reports', { recursive: true });\"",
     "pretest": "pnpm run build",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "test:esm-browser": "bun scripts/esm-browser-smoke.ts",
+    "test:esm-readiness": "bun scripts/esm-beta-readiness.ts",
+    "test:esm-compat": "bun scripts/esm-compat-suite.ts",
+    "test:esm-compat:local-baseline": "ESM_SH_ORIGIN=http://localhost:8081 bun scripts/esm-compat-suite.ts",
+    "vendor:esm-sh": "scripts/esm-sh-baseline/run.sh"
   }
 }

@@ -11,3 +11,6 @@ export { rewriteImports } from "./lib/pkg-imports.ts";
 export { parsePackagePathname } from "./lib/pkg-pathname.ts";
 
 export { resolvePackageVersion } from "./lib/pkg-version.ts";
+
+export type { EsmPackagePath, EsmRequestError, NormalizedEsmRequest } from "./lib/esm-url.ts";
+export { getEsmPackageSubpath, normalizeEsmRequestUrl, parseEsmPackagePathname } from "./lib/esm-url.ts";

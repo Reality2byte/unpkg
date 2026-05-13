@@ -1,0 +1,3817 @@
+{
+  "name": "ecosystem",
+  "description": "Version-pinned npm package scenarios for ecosystem-scale esm.sh compatibility measurement.",
+  "generatedAt": "2026-05-13T00:58:08.197Z",
+  "packageCount": 104,
+  "scenarioCount": 380,
+  "cases": [
+    {
+      "category": "cjs",
+      "description": "Package root for @babel/runtime@7.29.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@babel/runtime",
+      "path": "/@babel/runtime@7.29.2"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for @babel/runtime@7.29.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@babel/runtime",
+      "path": "/@babel/runtime@7.29.2?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for @babel/runtime@7.29.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@babel/runtime",
+      "path": "/@babel/runtime@7.29.2/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for @emotion/react@11.14.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@emotion/react",
+      "path": "/@emotion/react@11.14.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for @emotion/react@11.14.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@emotion/react",
+      "path": "/@emotion/react@11.14.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for @emotion/react@11.14.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@emotion/react",
+      "path": "/@emotion/react@11.14.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for @emotion/react@11.14.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "@emotion/react",
+      "path": "/@emotion/react@11.14.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for @emotion/react@11.14.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "@emotion/react",
+      "path": "/@emotion/react@11.14.0?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for @emotion/styled@11.14.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@emotion/styled",
+      "path": "/@emotion/styled@11.14.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for @emotion/styled@11.14.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@emotion/styled",
+      "path": "/@emotion/styled@11.14.1?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for @emotion/styled@11.14.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@emotion/styled",
+      "path": "/@emotion/styled@11.14.1/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for @emotion/styled@11.14.1",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "@emotion/styled",
+      "path": "/@emotion/styled@11.14.1?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for @emotion/styled@11.14.1",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "@emotion/styled",
+      "path": "/@emotion/styled@11.14.1?external=react,react-dom"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for @floating-ui/dom@1.7.6",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@floating-ui/dom",
+      "path": "/@floating-ui/dom@1.7.6"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for @floating-ui/dom@1.7.6",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@floating-ui/dom",
+      "path": "/@floating-ui/dom@1.7.6?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for @floating-ui/dom@1.7.6",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@floating-ui/dom",
+      "path": "/@floating-ui/dom@1.7.6/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for @floating-ui/react@0.27.19",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@floating-ui/react",
+      "path": "/@floating-ui/react@0.27.19"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for @floating-ui/react@0.27.19",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@floating-ui/react",
+      "path": "/@floating-ui/react@0.27.19?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for @floating-ui/react@0.27.19",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@floating-ui/react",
+      "path": "/@floating-ui/react@0.27.19/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for @floating-ui/react@0.27.19",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "@floating-ui/react",
+      "path": "/@floating-ui/react@0.27.19?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for @floating-ui/react@0.27.19",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "@floating-ui/react",
+      "path": "/@floating-ui/react@0.27.19?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for @reduxjs/toolkit@2.11.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@reduxjs/toolkit",
+      "path": "/@reduxjs/toolkit@2.11.2"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for @reduxjs/toolkit@2.11.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@reduxjs/toolkit",
+      "path": "/@reduxjs/toolkit@2.11.2?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for @reduxjs/toolkit@2.11.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@reduxjs/toolkit",
+      "path": "/@reduxjs/toolkit@2.11.2/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for @tanstack/react-query@5.100.10",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@tanstack/react-query",
+      "path": "/@tanstack/react-query@5.100.10"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for @tanstack/react-query@5.100.10",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@tanstack/react-query",
+      "path": "/@tanstack/react-query@5.100.10?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for @tanstack/react-query@5.100.10",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@tanstack/react-query",
+      "path": "/@tanstack/react-query@5.100.10/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for @tanstack/react-query@5.100.10",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "@tanstack/react-query",
+      "path": "/@tanstack/react-query@5.100.10?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for @tanstack/react-query@5.100.10",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "@tanstack/react-query",
+      "path": "/@tanstack/react-query@5.100.10?external=react,react-dom"
+    },
+    {
+      "category": "types",
+      "description": "Package root for @types/react@19.2.14",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "@types/react",
+      "path": "/@types/react@19.2.14"
+    },
+    {
+      "category": "types",
+      "description": "Metadata for @types/react@19.2.14",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "@types/react",
+      "path": "/@types/react@19.2.14?meta"
+    },
+    {
+      "category": "types",
+      "description": "Raw package.json for @types/react@19.2.14",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "@types/react",
+      "path": "/@types/react@19.2.14/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for axios@1.16.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "axios",
+      "path": "/axios@1.16.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for axios@1.16.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "axios",
+      "path": "/axios@1.16.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for axios@1.16.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "axios",
+      "path": "/axios@1.16.0/package.json?raw"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Package root for buffer@6.0.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "buffer",
+      "path": "/buffer@6.0.3"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Metadata for buffer@6.0.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "buffer",
+      "path": "/buffer@6.0.3?meta"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Raw package.json for buffer@6.0.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "buffer",
+      "path": "/buffer@6.0.3/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for chalk@5.6.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "chalk",
+      "path": "/chalk@5.6.2"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for chalk@5.6.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "chalk",
+      "path": "/chalk@5.6.2?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for chalk@5.6.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "chalk",
+      "path": "/chalk@5.6.2/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for classnames@2.5.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "classnames",
+      "path": "/classnames@2.5.1"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for classnames@2.5.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "classnames",
+      "path": "/classnames@2.5.1?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for classnames@2.5.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "classnames",
+      "path": "/classnames@2.5.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for clsx@2.1.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "clsx",
+      "path": "/clsx@2.1.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for clsx@2.1.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "clsx",
+      "path": "/clsx@2.1.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for clsx@2.1.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "clsx",
+      "path": "/clsx@2.1.1/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for color@5.0.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "color",
+      "path": "/color@5.0.3"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for color@5.0.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "color",
+      "path": "/color@5.0.3?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for color@5.0.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "color",
+      "path": "/color@5.0.3/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for commander@14.0.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "commander",
+      "path": "/commander@14.0.3"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for commander@14.0.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "commander",
+      "path": "/commander@14.0.3?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for commander@14.0.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "commander",
+      "path": "/commander@14.0.3/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for copy-to-clipboard@4.0.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "copy-to-clipboard",
+      "path": "/copy-to-clipboard@4.0.2"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for copy-to-clipboard@4.0.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "copy-to-clipboard",
+      "path": "/copy-to-clipboard@4.0.2?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for copy-to-clipboard@4.0.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "copy-to-clipboard",
+      "path": "/copy-to-clipboard@4.0.2/package.json?raw"
+    },
+    {
+      "category": "large-graph",
+      "description": "Package root for core-js@3.49.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "core-js",
+      "path": "/core-js@3.49.0"
+    },
+    {
+      "category": "large-graph",
+      "description": "Metadata for core-js@3.49.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "core-js",
+      "path": "/core-js@3.49.0?meta"
+    },
+    {
+      "category": "large-graph",
+      "description": "Raw package.json for core-js@3.49.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "core-js",
+      "path": "/core-js@3.49.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for cross-fetch@4.1.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "cross-fetch",
+      "path": "/cross-fetch@4.1.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for cross-fetch@4.1.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "cross-fetch",
+      "path": "/cross-fetch@4.1.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for cross-fetch@4.1.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "cross-fetch",
+      "path": "/cross-fetch@4.1.0/package.json?raw"
+    },
+    {
+      "category": "large-graph",
+      "description": "Package root for d3@7.9.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "d3",
+      "path": "/d3@7.9.0"
+    },
+    {
+      "category": "large-graph",
+      "description": "Metadata for d3@7.9.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "d3",
+      "path": "/d3@7.9.0?meta"
+    },
+    {
+      "category": "large-graph",
+      "description": "Raw package.json for d3@7.9.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "d3",
+      "path": "/d3@7.9.0/package.json?raw"
+    },
+    {
+      "category": "large-graph",
+      "description": "Explicit bundle for d3@7.9.0",
+      "expect": "module",
+      "features": [
+        "bundle"
+      ],
+      "package": "d3",
+      "path": "/d3@7.9.0?bundle"
+    },
+    {
+      "category": "large-graph",
+      "description": "No-bundle output for d3@7.9.0",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "d3",
+      "path": "/d3@7.9.0?no-bundle"
+    },
+    {
+      "category": "large-graph",
+      "description": "Standalone output for d3@7.9.0",
+      "expect": "module",
+      "features": [
+        "standalone"
+      ],
+      "package": "d3",
+      "path": "/d3@7.9.0?standalone"
+    },
+    {
+      "category": "large-graph",
+      "description": "Package root for d3-array@3.2.4",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "d3-array",
+      "path": "/d3-array@3.2.4"
+    },
+    {
+      "category": "large-graph",
+      "description": "Metadata for d3-array@3.2.4",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "d3-array",
+      "path": "/d3-array@3.2.4?meta"
+    },
+    {
+      "category": "large-graph",
+      "description": "Raw package.json for d3-array@3.2.4",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "d3-array",
+      "path": "/d3-array@3.2.4/package.json?raw"
+    },
+    {
+      "category": "large-graph",
+      "description": "Package root for d3-scale@4.0.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "d3-scale",
+      "path": "/d3-scale@4.0.2"
+    },
+    {
+      "category": "large-graph",
+      "description": "Metadata for d3-scale@4.0.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "d3-scale",
+      "path": "/d3-scale@4.0.2?meta"
+    },
+    {
+      "category": "large-graph",
+      "description": "Raw package.json for d3-scale@4.0.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "d3-scale",
+      "path": "/d3-scale@4.0.2/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for date-fns@4.1.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "date-fns",
+      "path": "/date-fns@4.1.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for date-fns@4.1.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "date-fns",
+      "path": "/date-fns@4.1.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for date-fns@4.1.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "date-fns",
+      "path": "/date-fns@4.1.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "No-bundle output for date-fns@4.1.0",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "date-fns",
+      "path": "/date-fns@4.1.0?no-bundle"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for dayjs@1.11.20",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "dayjs",
+      "path": "/dayjs@1.11.20"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for dayjs@1.11.20",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "dayjs",
+      "path": "/dayjs@1.11.20?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for dayjs@1.11.20",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "dayjs",
+      "path": "/dayjs@1.11.20/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for debug@4.4.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "debug",
+      "path": "/debug@4.4.3"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for debug@4.4.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "debug",
+      "path": "/debug@4.4.3?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for debug@4.4.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "debug",
+      "path": "/debug@4.4.3/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for decimal.js@10.6.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "decimal.js",
+      "path": "/decimal.js@10.6.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for decimal.js@10.6.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "decimal.js",
+      "path": "/decimal.js@10.6.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for decimal.js@10.6.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "decimal.js",
+      "path": "/decimal.js@10.6.0/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for deepmerge@4.3.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "deepmerge",
+      "path": "/deepmerge@4.3.1"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for deepmerge@4.3.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "deepmerge",
+      "path": "/deepmerge@4.3.1?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for deepmerge@4.3.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "deepmerge",
+      "path": "/deepmerge@4.3.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for dompurify@3.4.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "dompurify",
+      "path": "/dompurify@3.4.2"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for dompurify@3.4.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "dompurify",
+      "path": "/dompurify@3.4.2?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for dompurify@3.4.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "dompurify",
+      "path": "/dompurify@3.4.2/package.json?raw"
+    },
+    {
+      "category": "node-only",
+      "description": "Package root for dotenv@17.4.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "dotenv",
+      "path": "/dotenv@17.4.2"
+    },
+    {
+      "category": "node-only",
+      "description": "Metadata for dotenv@17.4.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "dotenv",
+      "path": "/dotenv@17.4.2?meta"
+    },
+    {
+      "category": "node-only",
+      "description": "Raw package.json for dotenv@17.4.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "dotenv",
+      "path": "/dotenv@17.4.2/package.json?raw"
+    },
+    {
+      "category": "node-only",
+      "description": "Node target for dotenv@17.4.2",
+      "expect": "module",
+      "features": [
+        "target-node"
+      ],
+      "package": "dotenv",
+      "path": "/dotenv@17.4.2?target=node"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Package root for events@3.3.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "events",
+      "path": "/events@3.3.0"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Metadata for events@3.3.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "events",
+      "path": "/events@3.3.0?meta"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Raw package.json for events@3.3.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "events",
+      "path": "/events@3.3.0/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for fast-deep-equal@3.1.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "fast-deep-equal",
+      "path": "/fast-deep-equal@3.1.3"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for fast-deep-equal@3.1.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "fast-deep-equal",
+      "path": "/fast-deep-equal@3.1.3?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for fast-deep-equal@3.1.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "fast-deep-equal",
+      "path": "/fast-deep-equal@3.1.3/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for formik@2.4.9",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "formik",
+      "path": "/formik@2.4.9"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for formik@2.4.9",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "formik",
+      "path": "/formik@2.4.9?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for formik@2.4.9",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "formik",
+      "path": "/formik@2.4.9/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for formik@2.4.9",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "formik",
+      "path": "/formik@2.4.9?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for formik@2.4.9",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "formik",
+      "path": "/formik@2.4.9?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for framer-motion@12.38.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "framer-motion",
+      "path": "/framer-motion@12.38.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for framer-motion@12.38.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "framer-motion",
+      "path": "/framer-motion@12.38.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for framer-motion@12.38.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "framer-motion",
+      "path": "/framer-motion@12.38.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for framer-motion@12.38.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "framer-motion",
+      "path": "/framer-motion@12.38.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for framer-motion@12.38.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "framer-motion",
+      "path": "/framer-motion@12.38.0?external=react,react-dom"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for fuse.js@7.3.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "fuse.js",
+      "path": "/fuse.js@7.3.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for fuse.js@7.3.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "fuse.js",
+      "path": "/fuse.js@7.3.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for fuse.js@7.3.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "fuse.js",
+      "path": "/fuse.js@7.3.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for graphql@16.14.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "graphql",
+      "path": "/graphql@16.14.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for graphql@16.14.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "graphql",
+      "path": "/graphql@16.14.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for graphql@16.14.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "graphql",
+      "path": "/graphql@16.14.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for history@5.3.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "history",
+      "path": "/history@5.3.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for history@5.3.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "history",
+      "path": "/history@5.3.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for history@5.3.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "history",
+      "path": "/history@5.3.0/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "Package root for htm@3.1.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "htm",
+      "path": "/htm@3.1.1"
+    },
+    {
+      "category": "framework",
+      "description": "Metadata for htm@3.1.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "htm",
+      "path": "/htm@3.1.1?meta"
+    },
+    {
+      "category": "framework",
+      "description": "Raw package.json for htm@3.1.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "htm",
+      "path": "/htm@3.1.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for immer@11.1.8",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "immer",
+      "path": "/immer@11.1.8"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for immer@11.1.8",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "immer",
+      "path": "/immer@11.1.8?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for immer@11.1.8",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "immer",
+      "path": "/immer@11.1.8/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for is-plain-object@5.0.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "is-plain-object",
+      "path": "/is-plain-object@5.0.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for is-plain-object@5.0.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "is-plain-object",
+      "path": "/is-plain-object@5.0.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for is-plain-object@5.0.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "is-plain-object",
+      "path": "/is-plain-object@5.0.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for js-cookie@3.0.5",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "js-cookie",
+      "path": "/js-cookie@3.0.5"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for js-cookie@3.0.5",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "js-cookie",
+      "path": "/js-cookie@3.0.5?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for js-cookie@3.0.5",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "js-cookie",
+      "path": "/js-cookie@3.0.5/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for js-yaml@4.1.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "js-yaml",
+      "path": "/js-yaml@4.1.1"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for js-yaml@4.1.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "js-yaml",
+      "path": "/js-yaml@4.1.1?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for js-yaml@4.1.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "js-yaml",
+      "path": "/js-yaml@4.1.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for jszip@3.10.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "jszip",
+      "path": "/jszip@3.10.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for jszip@3.10.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "jszip",
+      "path": "/jszip@3.10.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for jszip@3.10.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "jszip",
+      "path": "/jszip@3.10.1/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "Package root for lit@3.3.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "lit",
+      "path": "/lit@3.3.2"
+    },
+    {
+      "category": "framework",
+      "description": "Metadata for lit@3.3.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "lit",
+      "path": "/lit@3.3.2?meta"
+    },
+    {
+      "category": "framework",
+      "description": "Raw package.json for lit@3.3.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "lit",
+      "path": "/lit@3.3.2/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "No-bundle output for lit@3.3.2",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "lit",
+      "path": "/lit@3.3.2?no-bundle"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for lodash@4.18.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "lodash",
+      "path": "/lodash@4.18.1"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for lodash@4.18.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "lodash",
+      "path": "/lodash@4.18.1?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for lodash@4.18.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "lodash",
+      "path": "/lodash@4.18.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for lodash-es@4.18.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "lodash-es",
+      "path": "/lodash-es@4.18.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for lodash-es@4.18.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "lodash-es",
+      "path": "/lodash-es@4.18.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for lodash-es@4.18.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "lodash-es",
+      "path": "/lodash-es@4.18.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "No-bundle output for lodash-es@4.18.1",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "lodash-es",
+      "path": "/lodash-es@4.18.1?no-bundle"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for marked@18.0.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "marked",
+      "path": "/marked@18.0.3"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for marked@18.0.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "marked",
+      "path": "/marked@18.0.3?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for marked@18.0.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "marked",
+      "path": "/marked@18.0.3/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for memoize-one@6.0.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "memoize-one",
+      "path": "/memoize-one@6.0.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for memoize-one@6.0.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "memoize-one",
+      "path": "/memoize-one@6.0.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for memoize-one@6.0.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "memoize-one",
+      "path": "/memoize-one@6.0.0/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for mime@4.1.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "mime",
+      "path": "/mime@4.1.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for mime@4.1.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "mime",
+      "path": "/mime@4.1.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for mime@4.1.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "mime",
+      "path": "/mime@4.1.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for mobx@6.15.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "mobx",
+      "path": "/mobx@6.15.3"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for mobx@6.15.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "mobx",
+      "path": "/mobx@6.15.3?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for mobx@6.15.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "mobx",
+      "path": "/mobx@6.15.3/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for moment@2.30.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "moment",
+      "path": "/moment@2.30.1"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for moment@2.30.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "moment",
+      "path": "/moment@2.30.1?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for moment@2.30.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "moment",
+      "path": "/moment@2.30.1/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for ms@2.1.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "ms",
+      "path": "/ms@2.1.3"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for ms@2.1.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "ms",
+      "path": "/ms@2.1.3?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for ms@2.1.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "ms",
+      "path": "/ms@2.1.3/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for nanoid@5.1.11",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "nanoid",
+      "path": "/nanoid@5.1.11"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for nanoid@5.1.11",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "nanoid",
+      "path": "/nanoid@5.1.11?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for nanoid@5.1.11",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "nanoid",
+      "path": "/nanoid@5.1.11/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Browser target for nanoid@5.1.11",
+      "expect": "module",
+      "features": [
+        "target"
+      ],
+      "package": "nanoid",
+      "path": "/nanoid@5.1.11?target=es2020"
+    },
+    {
+      "category": "browser",
+      "description": "Node target for nanoid@5.1.11",
+      "expect": "module",
+      "features": [
+        "target-node"
+      ],
+      "package": "nanoid",
+      "path": "/nanoid@5.1.11?target=node"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Package root for path-browserify@1.0.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "path-browserify",
+      "path": "/path-browserify@1.0.1"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Metadata for path-browserify@1.0.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "path-browserify",
+      "path": "/path-browserify@1.0.1?meta"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Raw package.json for path-browserify@1.0.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "path-browserify",
+      "path": "/path-browserify@1.0.1/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "Package root for preact@10.29.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "preact",
+      "path": "/preact@10.29.1"
+    },
+    {
+      "category": "framework",
+      "description": "Metadata for preact@10.29.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "preact",
+      "path": "/preact@10.29.1?meta"
+    },
+    {
+      "category": "framework",
+      "description": "Raw package.json for preact@10.29.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "preact",
+      "path": "/preact@10.29.1/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "JSX runtime subpath for preact@10.29.1",
+      "expect": "module",
+      "features": [
+        "subpath",
+        "jsx-runtime"
+      ],
+      "package": "preact",
+      "path": "/preact@10.29.1/jsx-runtime"
+    },
+    {
+      "category": "framework",
+      "description": "No-bundle output for preact@10.29.1",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "preact",
+      "path": "/preact@10.29.1?no-bundle"
+    },
+    {
+      "category": "framework",
+      "description": "Worker wrapper for preact@10.29.1",
+      "expect": "module",
+      "features": [
+        "worker"
+      ],
+      "package": "preact",
+      "path": "/preact@10.29.1?worker"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for prop-types@15.8.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "prop-types",
+      "path": "/prop-types@15.8.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for prop-types@15.8.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "prop-types",
+      "path": "/prop-types@15.8.1?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for prop-types@15.8.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "prop-types",
+      "path": "/prop-types@15.8.1/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for qs@6.15.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "qs",
+      "path": "/qs@6.15.1"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for qs@6.15.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "qs",
+      "path": "/qs@6.15.1?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for qs@6.15.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "qs",
+      "path": "/qs@6.15.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for query-string@9.3.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "query-string",
+      "path": "/query-string@9.3.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for query-string@9.3.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "query-string",
+      "path": "/query-string@9.3.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for query-string@9.3.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "query-string",
+      "path": "/query-string@9.3.1/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for ramda@0.32.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "ramda",
+      "path": "/ramda@0.32.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for ramda@0.32.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "ramda",
+      "path": "/ramda@0.32.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for ramda@0.32.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "ramda",
+      "path": "/ramda@0.32.0/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "Package root for react@19.2.6",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react",
+      "path": "/react@19.2.6"
+    },
+    {
+      "category": "framework",
+      "description": "Metadata for react@19.2.6",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react",
+      "path": "/react@19.2.6?meta"
+    },
+    {
+      "category": "framework",
+      "description": "Raw package.json for react@19.2.6",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react",
+      "path": "/react@19.2.6/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "Development mode for react@19.2.6",
+      "expect": "module",
+      "features": [
+        "dev"
+      ],
+      "package": "react",
+      "path": "/react@19.2.6?dev"
+    },
+    {
+      "category": "framework",
+      "description": "JSX runtime subpath for react@19.2.6",
+      "expect": "module",
+      "features": [
+        "subpath",
+        "jsx-runtime"
+      ],
+      "package": "react",
+      "path": "/react@19.2.6/jsx-runtime"
+    },
+    {
+      "category": "framework",
+      "description": "Node target for react@19.2.6",
+      "expect": "module",
+      "features": [
+        "target-node"
+      ],
+      "package": "react",
+      "path": "/react@19.2.6?target=node"
+    },
+    {
+      "category": "framework",
+      "description": "Worker wrapper for react@19.2.6",
+      "expect": "module",
+      "features": [
+        "worker"
+      ],
+      "package": "react",
+      "path": "/react@19.2.6?worker"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for react-dom@19.2.6",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react-dom",
+      "path": "/react-dom@19.2.6"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for react-dom@19.2.6",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react-dom",
+      "path": "/react-dom@19.2.6?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for react-dom@19.2.6",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react-dom",
+      "path": "/react-dom@19.2.6/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for react-dom@19.2.6",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "react-dom",
+      "path": "/react-dom@19.2.6?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Development mode for react-dom@19.2.6",
+      "expect": "module",
+      "features": [
+        "dev"
+      ],
+      "package": "react-dom",
+      "path": "/react-dom@19.2.6?dev"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for react-dom@19.2.6",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "react-dom",
+      "path": "/react-dom@19.2.6?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for react-hook-form@7.75.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react-hook-form",
+      "path": "/react-hook-form@7.75.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for react-hook-form@7.75.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react-hook-form",
+      "path": "/react-hook-form@7.75.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for react-hook-form@7.75.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react-hook-form",
+      "path": "/react-hook-form@7.75.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for react-hook-form@7.75.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "react-hook-form",
+      "path": "/react-hook-form@7.75.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for react-hook-form@7.75.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "react-hook-form",
+      "path": "/react-hook-form@7.75.0?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for react-is@19.2.6",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react-is",
+      "path": "/react-is@19.2.6"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for react-is@19.2.6",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react-is",
+      "path": "/react-is@19.2.6?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for react-is@19.2.6",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react-is",
+      "path": "/react-is@19.2.6/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for react-redux@9.2.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react-redux",
+      "path": "/react-redux@9.2.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for react-redux@9.2.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react-redux",
+      "path": "/react-redux@9.2.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for react-redux@9.2.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react-redux",
+      "path": "/react-redux@9.2.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for react-redux@9.2.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "react-redux",
+      "path": "/react-redux@9.2.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for react-redux@9.2.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "react-redux",
+      "path": "/react-redux@9.2.0?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for react-router@7.15.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react-router",
+      "path": "/react-router@7.15.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for react-router@7.15.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react-router",
+      "path": "/react-router@7.15.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for react-router@7.15.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react-router",
+      "path": "/react-router@7.15.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for react-router@7.15.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "react-router",
+      "path": "/react-router@7.15.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for react-router@7.15.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "react-router",
+      "path": "/react-router@7.15.0?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for react-router-dom@7.15.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react-router-dom",
+      "path": "/react-router-dom@7.15.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for react-router-dom@7.15.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react-router-dom",
+      "path": "/react-router-dom@7.15.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for react-router-dom@7.15.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react-router-dom",
+      "path": "/react-router-dom@7.15.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for react-router-dom@7.15.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "react-router-dom",
+      "path": "/react-router-dom@7.15.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for react-router-dom@7.15.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "react-router-dom",
+      "path": "/react-router-dom@7.15.0?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for recharts@3.8.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "recharts",
+      "path": "/recharts@3.8.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for recharts@3.8.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "recharts",
+      "path": "/recharts@3.8.1?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for recharts@3.8.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "recharts",
+      "path": "/recharts@3.8.1/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for recharts@3.8.1",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "recharts",
+      "path": "/recharts@3.8.1?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for recharts@3.8.1",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "recharts",
+      "path": "/recharts@3.8.1?external=react,react-dom"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for redux@5.0.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "redux",
+      "path": "/redux@5.0.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for redux@5.0.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "redux",
+      "path": "/redux@5.0.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for redux@5.0.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "redux",
+      "path": "/redux@5.0.1/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for resolve@1.22.12",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "resolve",
+      "path": "/resolve@1.22.12"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for resolve@1.22.12",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "resolve",
+      "path": "/resolve@1.22.12?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for resolve@1.22.12",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "resolve",
+      "path": "/resolve@1.22.12/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for rxjs@7.8.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "rxjs",
+      "path": "/rxjs@7.8.2"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for rxjs@7.8.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "rxjs",
+      "path": "/rxjs@7.8.2?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for rxjs@7.8.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "rxjs",
+      "path": "/rxjs@7.8.2/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "No-bundle output for rxjs@7.8.2",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "rxjs",
+      "path": "/rxjs@7.8.2?no-bundle"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for scheduler@0.27.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "scheduler",
+      "path": "/scheduler@0.27.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for scheduler@0.27.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "scheduler",
+      "path": "/scheduler@0.27.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for scheduler@0.27.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "scheduler",
+      "path": "/scheduler@0.27.0/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for semver@7.8.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "semver",
+      "path": "/semver@7.8.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for semver@7.8.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "semver",
+      "path": "/semver@7.8.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for semver@7.8.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "semver",
+      "path": "/semver@7.8.0/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for shallowequal@1.1.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "shallowequal",
+      "path": "/shallowequal@1.1.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for shallowequal@1.1.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "shallowequal",
+      "path": "/shallowequal@1.1.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for shallowequal@1.1.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "shallowequal",
+      "path": "/shallowequal@1.1.0/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "Package root for solid-js@1.9.12",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "solid-js",
+      "path": "/solid-js@1.9.12"
+    },
+    {
+      "category": "framework",
+      "description": "Metadata for solid-js@1.9.12",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "solid-js",
+      "path": "/solid-js@1.9.12?meta"
+    },
+    {
+      "category": "framework",
+      "description": "Raw package.json for solid-js@1.9.12",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "solid-js",
+      "path": "/solid-js@1.9.12/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "JSX runtime subpath for solid-js@1.9.12",
+      "expect": "module",
+      "features": [
+        "subpath",
+        "jsx-runtime"
+      ],
+      "package": "solid-js",
+      "path": "/solid-js@1.9.12/jsx-runtime"
+    },
+    {
+      "category": "framework",
+      "description": "No-bundle output for solid-js@1.9.12",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "solid-js",
+      "path": "/solid-js@1.9.12?no-bundle"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Package root for stream-browserify@3.0.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "stream-browserify",
+      "path": "/stream-browserify@3.0.0"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Metadata for stream-browserify@3.0.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "stream-browserify",
+      "path": "/stream-browserify@3.0.0?meta"
+    },
+    {
+      "category": "node-builtin",
+      "description": "Raw package.json for stream-browserify@3.0.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "stream-browserify",
+      "path": "/stream-browserify@3.0.0/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for string-width@8.2.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "string-width",
+      "path": "/string-width@8.2.1"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for string-width@8.2.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "string-width",
+      "path": "/string-width@8.2.1?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for string-width@8.2.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "string-width",
+      "path": "/string-width@8.2.1/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for styled-components@6.4.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "styled-components",
+      "path": "/styled-components@6.4.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for styled-components@6.4.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "styled-components",
+      "path": "/styled-components@6.4.1?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for styled-components@6.4.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "styled-components",
+      "path": "/styled-components@6.4.1/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for styled-components@6.4.1",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "styled-components",
+      "path": "/styled-components@6.4.1?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for styled-components@6.4.1",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "styled-components",
+      "path": "/styled-components@6.4.1?external=react,react-dom"
+    },
+    {
+      "category": "framework",
+      "description": "Package root for svelte@5.55.5",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "svelte",
+      "path": "/svelte@5.55.5"
+    },
+    {
+      "category": "framework",
+      "description": "Metadata for svelte@5.55.5",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "svelte",
+      "path": "/svelte@5.55.5?meta"
+    },
+    {
+      "category": "framework",
+      "description": "Raw package.json for svelte@5.55.5",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "svelte",
+      "path": "/svelte@5.55.5/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for swr@2.4.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "swr",
+      "path": "/swr@2.4.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for swr@2.4.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "swr",
+      "path": "/swr@2.4.1?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for swr@2.4.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "swr",
+      "path": "/swr@2.4.1/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for swr@2.4.1",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "swr",
+      "path": "/swr@2.4.1?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External-all shorthand for swr@2.4.1",
+      "expect": "module",
+      "features": [
+        "external-all"
+      ],
+      "package": "swr",
+      "path": "/*swr@2.4.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for swr@2.4.1",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "swr",
+      "path": "/swr@2.4.1?external=react,react-dom"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for tiny-invariant@1.3.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "tiny-invariant",
+      "path": "/tiny-invariant@1.3.3"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for tiny-invariant@1.3.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "tiny-invariant",
+      "path": "/tiny-invariant@1.3.3?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for tiny-invariant@1.3.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "tiny-invariant",
+      "path": "/tiny-invariant@1.3.3/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for tslib@2.8.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "tslib",
+      "path": "/tslib@2.8.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for tslib@2.8.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "tslib",
+      "path": "/tslib@2.8.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for tslib@2.8.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "tslib",
+      "path": "/tslib@2.8.1/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for underscore@1.13.8",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "underscore",
+      "path": "/underscore@1.13.8"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for underscore@1.13.8",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "underscore",
+      "path": "/underscore@1.13.8?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for underscore@1.13.8",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "underscore",
+      "path": "/underscore@1.13.8/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for use-sync-external-store@1.6.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "use-sync-external-store",
+      "path": "/use-sync-external-store@1.6.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for use-sync-external-store@1.6.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "use-sync-external-store",
+      "path": "/use-sync-external-store@1.6.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for use-sync-external-store@1.6.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "use-sync-external-store",
+      "path": "/use-sync-external-store@1.6.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for use-sync-external-store@1.6.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "use-sync-external-store",
+      "path": "/use-sync-external-store@1.6.0?deps=react@18.3.1"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for uuid@14.0.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "uuid",
+      "path": "/uuid@14.0.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for uuid@14.0.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "uuid",
+      "path": "/uuid@14.0.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for uuid@14.0.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "uuid",
+      "path": "/uuid@14.0.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Browser target for uuid@14.0.0",
+      "expect": "module",
+      "features": [
+        "target"
+      ],
+      "package": "uuid",
+      "path": "/uuid@14.0.0?target=es2020"
+    },
+    {
+      "category": "browser",
+      "description": "Node target for uuid@14.0.0",
+      "expect": "module",
+      "features": [
+        "target-node"
+      ],
+      "package": "uuid",
+      "path": "/uuid@14.0.0?target=node"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for valtio@2.3.2",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "valtio",
+      "path": "/valtio@2.3.2"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for valtio@2.3.2",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "valtio",
+      "path": "/valtio@2.3.2?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for valtio@2.3.2",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "valtio",
+      "path": "/valtio@2.3.2/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for valtio@2.3.2",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "valtio",
+      "path": "/valtio@2.3.2?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for valtio@2.3.2",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "valtio",
+      "path": "/valtio@2.3.2?external=react,react-dom"
+    },
+    {
+      "category": "node-only",
+      "description": "Package root for vite@8.0.12",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "vite",
+      "path": "/vite@8.0.12"
+    },
+    {
+      "category": "node-only",
+      "description": "Metadata for vite@8.0.12",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "vite",
+      "path": "/vite@8.0.12?meta"
+    },
+    {
+      "category": "node-only",
+      "description": "Raw package.json for vite@8.0.12",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "vite",
+      "path": "/vite@8.0.12/package.json?raw"
+    },
+    {
+      "category": "node-only",
+      "description": "Node target for vite@8.0.12",
+      "expect": "module",
+      "features": [
+        "target-node"
+      ],
+      "package": "vite",
+      "path": "/vite@8.0.12?target=node"
+    },
+    {
+      "category": "framework",
+      "description": "Package root for vue@3.5.34",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "vue",
+      "path": "/vue@3.5.34"
+    },
+    {
+      "category": "framework",
+      "description": "Metadata for vue@3.5.34",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "vue",
+      "path": "/vue@3.5.34?meta"
+    },
+    {
+      "category": "framework",
+      "description": "Raw package.json for vue@3.5.34",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "vue",
+      "path": "/vue@3.5.34/package.json?raw"
+    },
+    {
+      "category": "framework",
+      "description": "Development mode for vue@3.5.34",
+      "expect": "module",
+      "features": [
+        "dev"
+      ],
+      "package": "vue",
+      "path": "/vue@3.5.34?dev"
+    },
+    {
+      "category": "framework",
+      "description": "No-bundle output for vue@3.5.34",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "vue",
+      "path": "/vue@3.5.34?no-bundle"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for vue-router@5.0.6",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "vue-router",
+      "path": "/vue-router@5.0.6"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for vue-router@5.0.6",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "vue-router",
+      "path": "/vue-router@5.0.6?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for vue-router@5.0.6",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "vue-router",
+      "path": "/vue-router@5.0.6/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for yallist@5.0.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "yallist",
+      "path": "/yallist@5.0.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for yallist@5.0.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "yallist",
+      "path": "/yallist@5.0.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for yallist@5.0.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "yallist",
+      "path": "/yallist@5.0.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for yaml@2.9.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "yaml",
+      "path": "/yaml@2.9.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for yaml@2.9.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "yaml",
+      "path": "/yaml@2.9.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for yaml@2.9.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "yaml",
+      "path": "/yaml@2.9.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for yup@1.7.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "yup",
+      "path": "/yup@1.7.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for yup@1.7.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "yup",
+      "path": "/yup@1.7.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for yup@1.7.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "yup",
+      "path": "/yup@1.7.1/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for zod@4.4.3",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "zod",
+      "path": "/zod@4.4.3"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for zod@4.4.3",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "zod",
+      "path": "/zod@4.4.3?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for zod@4.4.3",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "zod",
+      "path": "/zod@4.4.3/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for zustand@5.0.13",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "zustand",
+      "path": "/zustand@5.0.13"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for zustand@5.0.13",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "zustand",
+      "path": "/zustand@5.0.13?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for zustand@5.0.13",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "zustand",
+      "path": "/zustand@5.0.13/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for zustand@5.0.13",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "zustand",
+      "path": "/zustand@5.0.13?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for zustand@5.0.13",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "zustand",
+      "path": "/zustand@5.0.13?external=react,react-dom"
+    },
+    {
+      "category": "large-graph",
+      "description": "Package root for three@0.184.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "three",
+      "path": "/three@0.184.0"
+    },
+    {
+      "category": "large-graph",
+      "description": "Metadata for three@0.184.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "three",
+      "path": "/three@0.184.0?meta"
+    },
+    {
+      "category": "large-graph",
+      "description": "Raw package.json for three@0.184.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "three",
+      "path": "/three@0.184.0/package.json?raw"
+    },
+    {
+      "category": "large-graph",
+      "description": "Explicit bundle for three@0.184.0",
+      "expect": "module",
+      "features": [
+        "bundle"
+      ],
+      "package": "three",
+      "path": "/three@0.184.0?bundle"
+    },
+    {
+      "category": "large-graph",
+      "description": "No-bundle output for three@0.184.0",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "three",
+      "path": "/three@0.184.0?no-bundle"
+    },
+    {
+      "category": "large-graph",
+      "description": "Standalone output for three@0.184.0",
+      "expect": "module",
+      "features": [
+        "standalone"
+      ],
+      "package": "three",
+      "path": "/three@0.184.0?standalone"
+    },
+    {
+      "category": "large-graph",
+      "description": "Package root for monaco-editor@0.55.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "monaco-editor",
+      "path": "/monaco-editor@0.55.1"
+    },
+    {
+      "category": "large-graph",
+      "description": "Metadata for monaco-editor@0.55.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "monaco-editor",
+      "path": "/monaco-editor@0.55.1?meta"
+    },
+    {
+      "category": "large-graph",
+      "description": "Raw package.json for monaco-editor@0.55.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "monaco-editor",
+      "path": "/monaco-editor@0.55.1/package.json?raw"
+    },
+    {
+      "category": "large-graph",
+      "description": "Explicit bundle for monaco-editor@0.55.1",
+      "expect": "module",
+      "features": [
+        "bundle"
+      ],
+      "package": "monaco-editor",
+      "path": "/monaco-editor@0.55.1?bundle"
+    },
+    {
+      "category": "large-graph",
+      "description": "No-bundle output for monaco-editor@0.55.1",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "monaco-editor",
+      "path": "/monaco-editor@0.55.1?no-bundle"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for lucide-react@1.14.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "lucide-react",
+      "path": "/lucide-react@1.14.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for lucide-react@1.14.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "lucide-react",
+      "path": "/lucide-react@1.14.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for lucide-react@1.14.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "lucide-react",
+      "path": "/lucide-react@1.14.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for lucide-react@1.14.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "lucide-react",
+      "path": "/lucide-react@1.14.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for lucide-react@1.14.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "lucide-react",
+      "path": "/lucide-react@1.14.0?external=react,react-dom"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for react-window@2.2.7",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "react-window",
+      "path": "/react-window@2.2.7"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for react-window@2.2.7",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "react-window",
+      "path": "/react-window@2.2.7?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for react-window@2.2.7",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "react-window",
+      "path": "/react-window@2.2.7/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for react-window@2.2.7",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "react-window",
+      "path": "/react-window@2.2.7?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for react-window@2.2.7",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "react-window",
+      "path": "/react-window@2.2.7?external=react,react-dom"
+    },
+    {
+      "category": "large-graph",
+      "description": "Package root for ag-grid-community@35.3.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "ag-grid-community",
+      "path": "/ag-grid-community@35.3.0"
+    },
+    {
+      "category": "large-graph",
+      "description": "Metadata for ag-grid-community@35.3.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "ag-grid-community",
+      "path": "/ag-grid-community@35.3.0?meta"
+    },
+    {
+      "category": "large-graph",
+      "description": "Raw package.json for ag-grid-community@35.3.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "ag-grid-community",
+      "path": "/ag-grid-community@35.3.0/package.json?raw"
+    },
+    {
+      "category": "large-graph",
+      "description": "Explicit bundle for ag-grid-community@35.3.0",
+      "expect": "module",
+      "features": [
+        "bundle"
+      ],
+      "package": "ag-grid-community",
+      "path": "/ag-grid-community@35.3.0?bundle"
+    },
+    {
+      "category": "large-graph",
+      "description": "No-bundle output for ag-grid-community@35.3.0",
+      "expect": "module",
+      "features": [
+        "no-bundle"
+      ],
+      "package": "ag-grid-community",
+      "path": "/ag-grid-community@35.3.0?no-bundle"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for xstate@5.31.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "xstate",
+      "path": "/xstate@5.31.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for xstate@5.31.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "xstate",
+      "path": "/xstate@5.31.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for xstate@5.31.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "xstate",
+      "path": "/xstate@5.31.1/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Package root for jotai@2.20.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "jotai",
+      "path": "/jotai@2.20.0"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Metadata for jotai@2.20.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "jotai",
+      "path": "/jotai@2.20.0?meta"
+    },
+    {
+      "category": "framework-peer",
+      "description": "Raw package.json for jotai@2.20.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "jotai",
+      "path": "/jotai@2.20.0/package.json?raw"
+    },
+    {
+      "category": "framework-peer",
+      "description": "React dependency override for jotai@2.20.0",
+      "expect": "module",
+      "features": [
+        "deps"
+      ],
+      "package": "jotai",
+      "path": "/jotai@2.20.0?deps=react@18.3.1"
+    },
+    {
+      "category": "framework-peer",
+      "description": "External React for jotai@2.20.0",
+      "expect": "module",
+      "features": [
+        "external"
+      ],
+      "package": "jotai",
+      "path": "/jotai@2.20.0?external=react,react-dom"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for es-toolkit@1.46.1",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "es-toolkit",
+      "path": "/es-toolkit@1.46.1"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for es-toolkit@1.46.1",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "es-toolkit",
+      "path": "/es-toolkit@1.46.1?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for es-toolkit@1.46.1",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "es-toolkit",
+      "path": "/es-toolkit@1.46.1/package.json?raw"
+    },
+    {
+      "category": "cjs",
+      "description": "Package root for numbro@2.5.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "numbro",
+      "path": "/numbro@2.5.0"
+    },
+    {
+      "category": "cjs",
+      "description": "Metadata for numbro@2.5.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "numbro",
+      "path": "/numbro@2.5.0?meta"
+    },
+    {
+      "category": "cjs",
+      "description": "Raw package.json for numbro@2.5.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "numbro",
+      "path": "/numbro@2.5.0/package.json?raw"
+    },
+    {
+      "category": "browser",
+      "description": "Package root for date-fns-tz@3.2.0",
+      "expect": "module",
+      "features": [
+        "package-root"
+      ],
+      "package": "date-fns-tz",
+      "path": "/date-fns-tz@3.2.0"
+    },
+    {
+      "category": "browser",
+      "description": "Metadata for date-fns-tz@3.2.0",
+      "expect": "json",
+      "features": [
+        "meta"
+      ],
+      "package": "date-fns-tz",
+      "path": "/date-fns-tz@3.2.0?meta"
+    },
+    {
+      "category": "browser",
+      "description": "Raw package.json for date-fns-tz@3.2.0",
+      "expect": "json",
+      "features": [
+        "raw"
+      ],
+      "package": "date-fns-tz",
+      "path": "/date-fns-tz@3.2.0/package.json?raw"
+    },
+    {
+      "category": "css",
+      "description": "Package CSS root for normalize.css@8.0.1",
+      "expect": "css",
+      "features": [
+        "css",
+        "package-root"
+      ],
+      "package": "normalize.css",
+      "path": "/normalize.css@8.0.1"
+    },
+    {
+      "category": "css",
+      "description": "Direct CSS file for bootstrap@5.3.8",
+      "expect": "css",
+      "features": [
+        "css",
+        "subpath"
+      ],
+      "package": "bootstrap",
+      "path": "/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    },
+    {
+      "category": "css",
+      "description": "Direct CSS file for react-toastify@11.0.5",
+      "expect": "css",
+      "features": [
+        "css",
+        "subpath"
+      ],
+      "package": "react-toastify",
+      "path": "/react-toastify@11.0.5/dist/ReactToastify.css"
+    },
+    {
+      "category": "css",
+      "description": "CSS module output for react-toastify@11.0.5",
+      "expect": "module",
+      "features": [
+        "css",
+        "css-module"
+      ],
+      "package": "react-toastify",
+      "path": "/react-toastify@11.0.5/dist/ReactToastify.css?module"
+    },
+    {
+      "category": "css",
+      "description": "Explicit CSS request without a stylesheet for react@18.3.1",
+      "expect": "diagnostic",
+      "features": [
+        "css",
+        "css-not-found"
+      ],
+      "package": "react",
+      "path": "/react@18.3.1?css"
+    }
+  ]
+}
