@@ -28,7 +28,7 @@
     "dev:assets": "bun ../../scripts/serve-assets.ts",
     "test": "bun --preload=./test/setup.ts test",
     "predeploy": "pnpm run build:assets",
-    "deploy": "wrangler deploy",
-    "deploy:staging": "wrangler deploy --env staging"
+    "deploy": "../../scripts/with-local-env.sh wrangler deploy",
+    "deploy:staging": "../../scripts/with-local-env.sh wrangler deploy --env staging"
   }
 }

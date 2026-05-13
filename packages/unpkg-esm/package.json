@@ -17,7 +17,7 @@
     "build": "wrangler deploy --dry-run --outdir=dist",
     "dev": "wrangler dev --env dev --port 3002",
     "test": "bun --preload=./test/setup.ts test",
-    "deploy": "wrangler deploy",
-    "deploy:staging": "wrangler deploy --env staging"
+    "deploy": "../../scripts/with-local-env.sh wrangler deploy",
+    "deploy:staging": "../../scripts/with-local-env.sh wrangler deploy --env staging"
   }
 }

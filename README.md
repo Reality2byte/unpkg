@@ -61,7 +61,15 @@ pnpm --filter unpkg-files run deploy
 
 To deploy the workers, you'll need a [Cloudflare](https://cloudflare.com) account. You will also need to (1) edit the `wrangler.json` file in each worker and update its [`routes`](https://developers.cloudflare.com/workers/wrangler/configuration/) to your own domain(s) and (2) adjust each worker's environment `vars` (in `wrangler.json`) so they can find one another in production.
 
-Once you've done that, you can deploy each worker with:
+For API token authentication, create a local `.env.local` file from `.env.example` and set `CLOUDFLARE_API_TOKEN`. The worker deploy scripts load `.env.local` automatically before invoking Wrangler. Use a token with the Cloudflare permissions needed for the operation you are running, such as worker deploy permissions for deploys and cache purge permissions when purging CDN entries.
+
+Once you've done that, you can deploy all workers with:
+
+```sh
+pnpm run deploy:workers
+```
+
+Or deploy each worker individually with:
 
 ```sh
 pnpm --filter unpkg-www run deploy

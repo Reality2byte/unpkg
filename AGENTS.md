@@ -21,6 +21,7 @@ This repository powers UNPKG, a CDN and web app for serving npm package files di
 - Docker is used to run the pinned local esm.sh baseline for compatibility tests.
 - Use pnpm for workspace commands and dependency management.
 - Do not assume Node and Bun are interchangeable here: prefer the command already declared in `package.json` scripts.
+- Local Cloudflare API tokens belong in `.env.local`, which is gitignored. Wrangler deploy scripts load it through `scripts/with-local-env.sh`; do not commit machine-specific token paths or secret values.
 
 ## Common Commands
 
