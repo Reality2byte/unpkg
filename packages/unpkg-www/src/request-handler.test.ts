@@ -428,6 +428,31 @@ describe("handleRequest", () => {
         'return new Worker("https://esm.unpkg.com/preact@10.26.4/src/component.js?target=es2022", { type: "module", ...options });'
       );
     });
+
+    it("returns inline TSX runner helper modules", async () => {
+      let response = await dispatchFetch("https://esm.unpkg.com/run");
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+      expect(await response.text()).toContain("export async function run");
+
+      response = await dispatchFetch("https://esm.unpkg.com/tsx");
+      expect(response.status).toBe(200);
+      expect(await response.text()).toContain('"/transform?"');
+    });
+
+    it("proxies inline transforms to the files origin", async () => {
+      let response = await dispatchFetch("https://esm.unpkg.com/transform?target=es2022&jsx=automatic&external=*", {
+        method: "POST",
+        body: JSON.stringify({
+          filename: "/inline.tsx",
+          source: "export const view: JSX.Element = <div />;",
+        }),
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+      expect(await response.text()).toContain('from "react/jsx-runtime";');
+    });
   });
 
   describe("/browse/* requests", () => {

@@ -37,6 +37,9 @@ const browserTargets = new Set([
   "es2023",
   "es2024",
   "esnext",
+  "deno",
+  "denonext",
+  "node",
 ]);
 
 const rawModeConflicts = new Set([

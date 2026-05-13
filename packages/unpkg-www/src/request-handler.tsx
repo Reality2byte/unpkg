@@ -22,23 +22,26 @@ import { Home } from "./components/home.tsx";
 const publicNpmRegistry = "https://registry.npmjs.org";
 
 export async function handleRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
+  let url = new URL(request.url);
+
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
-        Allow: "GET, HEAD, OPTIONS",
+        Allow: "GET, HEAD, OPTIONS, POST",
         "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS, POST",
         "Access-Control-Allow-Origin": "*",
       },
     });
+  }
+  if (url.hostname === "esm.unpkg.com" && url.pathname === "/transform" && request.method === "POST") {
+    return handleEsmInlineTransformRequest(request, env);
   }
   if (request.method !== "GET" && request.method !== "HEAD") {
     return new Response(`Invalid request method: ${request.method}`, {
       status: 405,
     });
   }
-
-  let url = new URL(request.url);
 
   if (url.pathname === "/_health") {
     return new Response("OK");
@@ -278,6 +281,15 @@ export async function handleRequest(request: Request, env: Env, context: Executi
 
 async function handleEsmRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
   let originalUrl = new URL(request.url);
+  if (originalUrl.pathname === "/run" || originalUrl.pathname === "/tsx") {
+    return new Response(createEsmInlineRunner(), {
+      headers: esmCorsHeaders({
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/javascript; charset=utf-8",
+      }),
+    });
+  }
+
   let normalized = normalizeEsmRequestUrl(request.url);
   if ("code" in normalized) {
     return esmError(normalized);
@@ -615,6 +627,109 @@ function redirect(location: string | URL, init?: ResponseInit | number): Respons
       ...init?.headers,
     },
   });
+}
+
+async function handleEsmInlineTransformRequest(request: Request, env: Env): Promise<Response> {
+  let sourceResponse = await fetch(new URL(`/transform${new URL(request.url).search}`, env.FILES_ORIGIN), {
+    method: "POST",
+    headers: {
+      "Content-Type": request.headers.get("Content-Type") ?? "application/json",
+    },
+    body: await request.arrayBuffer(),
+  });
+
+  let headers = new Headers(sourceResponse.headers);
+  for (let [name, value] of Object.entries(esmCorsHeaders())) {
+    headers.set(name, value);
+  }
+
+  return new Response(await sourceResponse.arrayBuffer(), {
+    status: sourceResponse.status,
+    statusText: sourceResponse.statusText,
+    headers,
+  });
+}
+
+function createEsmInlineRunner(): string {
+  return `const supportedScriptTypes = new Set(["text/babel", "text/jsx", "text/ts", "text/tsx"]);
+
+function scriptFilename(script, index) {
+  return script.getAttribute("data-filename") || "/inline-" + index + extensionForType(script.type);
+}
+
+function extensionForType(type) {
+  if (type === "text/ts") return ".ts";
+  if (type === "text/tsx") return ".tsx";
+  if (type === "text/jsx") return ".jsx";
+  return ".js";
+}
+
+function transformSearchParams(script) {
+  let params = new URLSearchParams();
+  params.set("target", script.getAttribute("data-target") || "es2022");
+  params.set("external", "*");
+
+  let type = script.type;
+  if (type === "text/jsx" || type === "text/tsx" || type === "text/babel") {
+    params.set("jsx", script.getAttribute("data-jsx") || "automatic");
+  }
+  if (script.hasAttribute("data-jsx-import-source")) {
+    params.set("jsxImportSource", script.getAttribute("data-jsx-import-source"));
+  }
+  if (script.hasAttribute("data-dev")) {
+    params.set("env", "development");
+  }
+
+  return params;
+}
+
+async function transformScript(script, index) {
+  let filename = scriptFilename(script, index);
+  let response = await fetch(new URL("/transform?" + transformSearchParams(script), import.meta.url), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      filename,
+      source: script.textContent || ""
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+
+  return response.text();
+}
+
+export async function run(root = document) {
+  let scripts = Array.from(root.querySelectorAll("script[type]")).filter((script) => {
+    return supportedScriptTypes.has(script.type) && !script.hasAttribute("data-esm-unpkg-ran");
+  });
+
+  for (let index = 0; index < scripts.length; index += 1) {
+    let script = scripts[index];
+    script.setAttribute("data-esm-unpkg-ran", "");
+
+    let moduleScript = document.createElement("script");
+    moduleScript.type = "module";
+    if (script.nonce) {
+      moduleScript.nonce = script.nonce;
+    }
+    moduleScript.textContent = await transformScript(script, index);
+    script.after(moduleScript);
+  }
+}
+
+export default run;
+
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => run(), { once: true });
+  } else {
+    run();
+  }
+}
+`;
 }
 
 async function renderPage(env: Env, node: VNode, init?: ResponseInit): Promise<Response> {

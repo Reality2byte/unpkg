@@ -181,5 +181,26 @@ describe("handleRequest", () => {
       let response = await dispatchFetch("https://files.unpkg.com/build/preact@10.26.4/missing.js?target=es2022");
       expect(response.status).toBe(404);
     });
+
+    it("returns 415 for unsupported source types", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/build/preact@10.26.4/component.vue?target=es2022");
+      expect(response.status).toBe(415);
+    });
+  });
+
+  describe("/transform requests", () => {
+    it("transforms inline TSX source", async () => {
+      let response = await dispatchFetch("https://files.unpkg.com/transform?target=es2022&jsx=automatic&external=*", {
+        method: "POST",
+        body: JSON.stringify({
+          filename: "/inline.tsx",
+          source: "export const view: JSX.Element = <div />;",
+        }),
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+      expect(await response.text()).toContain('from "react/jsx-runtime";');
+    });
   });
 });

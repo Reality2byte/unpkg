@@ -68,6 +68,12 @@ export interface BuildResult {
   metadata: BuildMetadata;
 }
 
+export interface InlineTransformRequest {
+  filename: string;
+  options: NormalizedBuildOptions;
+  source: string;
+}
+
 interface PackageJson {
   dependencies?: Record<string, string>;
   exports?: string | Record<string, unknown>;
@@ -88,6 +94,16 @@ export class UnsupportedNodeBuiltinError extends Error {
   }
 }
 
+export class UnsupportedSourceTypeError extends Error {
+  filename: string;
+
+  constructor(filename: string) {
+    super(`Unsupported source type: ${filename}`);
+    this.name = "UnsupportedSourceTypeError";
+    this.filename = filename;
+  }
+}
+
 export async function buildEsmModule(registry: string, request: BuildRequest): Promise<BuildResult | null> {
   let packageJsonFile = await getFile(registry, request.packageName, request.version, "/package.json");
   if (packageJsonFile == null) {
@@ -98,6 +114,9 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
   let filename = resolveBuildFilename(packageJson, request.filename);
   if (filename == null) {
     return null;
+  }
+  if (isUnsupportedSourceFile(filename)) {
+    throw new UnsupportedSourceTypeError(filename);
   }
 
   let file = await getFile(registry, request.packageName, request.version, filename);
@@ -132,6 +151,38 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
       "X-UNPKG-Transformer": "esbuild",
     },
     metadata,
+  };
+}
+
+export async function transformInlineEsmModule(registry: string, request: InlineTransformRequest): Promise<BuildResult> {
+  if (isUnsupportedSourceFile(request.filename)) {
+    throw new UnsupportedSourceTypeError(request.filename);
+  }
+  if (!isSupportedSourceFile(request.filename)) {
+    throw new UnsupportedSourceTypeError(request.filename);
+  }
+
+  let transformed = await transformSource(request.source, request.filename, request.options);
+  let rewritten = await rewriteEsmImports(transformed.code, registry, request.options.origin, {}, request.options);
+  let buildKey = createInlineBuildKey(request);
+
+  return {
+    code: rewritten,
+    headers: {
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "Content-Type": "application/javascript; charset=utf-8",
+      "X-UNPKG-Build-Key": buildKey,
+      "X-UNPKG-Build-Input": request.filename,
+      "X-UNPKG-Transformer": "esbuild",
+    },
+    metadata: {
+      buildKey,
+      input: request.filename,
+      output: request.filename,
+      packageName: "<inline>",
+      target: request.options.target,
+      version: "0.0.0",
+    },
   };
 }
 
@@ -224,7 +275,8 @@ export async function bundleSource(
       resolveDir: path.posix.dirname(filename),
       sourcefile: filename,
     },
-    target: options.target,
+    platform: options.target === "node" ? "node" : "browser",
+    target: getEsbuildTarget(options.target),
     write: false,
   });
 
@@ -287,6 +339,17 @@ export function createBuildKey(request: BuildRequest, resolvedFilename: string):
   return createHash("sha256").update(key).digest("hex");
 }
 
+function createInlineBuildKey(request: InlineTransformRequest): string {
+  let key = JSON.stringify({
+    filename: request.filename,
+    options: request.options,
+    service: "esm-inline-transform-v1",
+    source: request.source,
+  });
+
+  return createHash("sha256").update(key).digest("hex");
+}
+
 function resolveBuildFilename(packageJson: PackageJson, filename: string | undefined): string | null {
   if (filename != null && filename !== "/") {
     return filename;
@@ -337,7 +400,7 @@ export async function transformSource(
     minify: options.minify,
     sourcemap: options.sourcemap ? "inline" : false,
     sourcefile: filename,
-    target: options.target,
+    target: getEsbuildTarget(options.target),
   });
 
   return {
@@ -442,6 +505,26 @@ function isSupportedSourceFile(filename: string): boolean {
   return /\.(?:[cm]?js|jsx|tsx?)$/.test(filename);
 }
 
+function isUnsupportedSourceFile(filename: string): boolean {
+  return /\.(?:css|svelte|vue)$/.test(filename);
+}
+
+function getEsbuildTarget(target: string): esbuild.TransformOptions["target"] {
+  if (target === "deno" || target === "denonext" || target === "node") {
+    return "es2022";
+  }
+
+  return target as esbuild.TransformOptions["target"];
+}
+
+function isRuntimeNativeTarget(target: string): boolean {
+  return target === "deno" || target === "denonext" || target === "node";
+}
+
+function isNodeBuiltinSpecifier(specifier: string): boolean {
+  return specifier.startsWith("node:") || specifier in browserBuiltinPolyfills || hardNodeBuiltins.has(specifier);
+}
+
 function parseJsxMode(value: string | null): NormalizedBuildOptions["jsx"] {
   if (value === "react" || value === "preact" || value === "automatic") {
     return value;
@@ -457,6 +540,10 @@ async function rewriteEsmSpecifier(
   dependencies: Record<string, string>,
   options: NormalizedBuildOptions
 ): Promise<string> {
+  if (isRuntimeNativeTarget(options.target) && isNodeBuiltinSpecifier(specifier)) {
+    return specifier;
+  }
+
   if (hardNodeBuiltins.has(specifier)) {
     throw new UnsupportedNodeBuiltinError(specifier);
   }

@@ -47,12 +47,10 @@ describe("normalizeEsmRequestUrl", () => {
     expect("url" in result && result.url.search).toBe("?dev=&target=es2022");
   });
 
-  it("rejects unsupported targets", () => {
-    expect(normalizeEsmRequestUrl("https://esm.unpkg.com/react?target=node")).toEqual({
-      code: "UNSUPPORTED_TARGET",
-      message: "Unsupported target: node",
-      status: 400,
-    });
+  it("accepts runtime-native esm.sh compatibility targets", () => {
+    let result = normalizeEsmRequestUrl("https://esm.unpkg.com/react?target=node");
+
+    expect("url" in result && result.url.search).toBe("?target=node");
   });
 
   it("rejects conflicting development and production flags", () => {

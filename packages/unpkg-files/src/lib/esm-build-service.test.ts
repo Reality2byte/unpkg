@@ -111,6 +111,13 @@ describe("rewriteEsmImports", () => {
       UnsupportedNodeBuiltinError
     );
   });
+
+  it("preserves Node builtins for runtime-native targets", async () => {
+    let code = 'import fs from "node:fs";\nimport process from "node:process";';
+    let result = await rewriteEsmImports(code, registry, "https://esm.unpkg.com", {}, options("target=node"));
+
+    expect(result).toBe(code);
+  });
 });
 
 describe("transformSource", () => {
