@@ -4,6 +4,7 @@ import {
   normalizeBuildOptions,
   parseAliases,
   parseDependencyOverrides,
+  resolveBuildFilename,
   rewriteEsmImports,
   transformSource,
   UnsupportedNodeBuiltinError,
@@ -26,6 +27,41 @@ describe("parseAliases", () => {
       react: "preact/compat",
       "react-dom": "preact/compat",
     });
+  });
+});
+
+describe("resolveBuildFilename", () => {
+  let packageJson = {
+    exports: {
+      ".": {
+        worker: "./worker.js",
+        node: "./node.js",
+        deno: "./deno.js",
+        browser: {
+          development: "./browser-development.js",
+          production: "./browser-production.js",
+        },
+        import: "./import.js",
+      },
+    },
+    module: "./module.js",
+  };
+
+  it("prefers browser production conditions by default", () => {
+    expect(resolveBuildFilename(packageJson, undefined, options())).toBe("/browser-production.js");
+  });
+
+  it("prefers browser development conditions in dev mode", () => {
+    expect(resolveBuildFilename(packageJson, undefined, options("dev"))).toBe("/browser-development.js");
+  });
+
+  it("honors custom conditions before default browser conditions", () => {
+    expect(resolveBuildFilename(packageJson, undefined, options("conditions=worker"))).toBe("/worker.js");
+  });
+
+  it("uses runtime-native conditions for node and deno targets", () => {
+    expect(resolveBuildFilename(packageJson, undefined, options("target=node"))).toBe("/node.js");
+    expect(resolveBuildFilename(packageJson, undefined, options("target=deno"))).toBe("/deno.js");
   });
 });
 

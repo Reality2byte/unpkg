@@ -40,6 +40,7 @@ export interface BuildRequest {
 export interface NormalizedBuildOptions {
   aliases: Record<string, string>;
   bundleMode: "smart" | "bundle" | "standalone" | "none";
+  conditions: string[];
   dependencyOverrides: Record<string, string>;
   env: "development" | "production";
   external: string[];
@@ -111,7 +112,7 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
   }
 
   let packageJson = JSON.parse(new TextDecoder().decode(packageJsonFile.body)) as PackageJson;
-  let filename = resolveBuildFilename(packageJson, request.filename);
+  let filename = resolveBuildFilename(packageJson, request.filename, request.options);
   if (filename == null) {
     return null;
   }
@@ -190,6 +191,7 @@ export function normalizeBuildOptions(searchParams: URLSearchParams): Normalized
   return {
     aliases: parseAliases(searchParams.get("alias")),
     bundleMode: parseBundleMode(searchParams),
+    conditions: parseConditions(searchParams),
     dependencyOverrides: parseDependencyOverrides(searchParams.get("deps")),
     env: searchParams.has("dev") || searchParams.get("env") === "development" ? "development" : "production",
     external: searchParams.get("external")?.split(",").filter(Boolean) ?? [],
@@ -350,16 +352,37 @@ function createInlineBuildKey(request: InlineTransformRequest): string {
   return createHash("sha256").update(key).digest("hex");
 }
 
-function resolveBuildFilename(packageJson: PackageJson, filename: string | undefined): string | null {
+export function resolveBuildFilename(
+  packageJson: PackageJson,
+  filename: string | undefined,
+  options: Pick<NormalizedBuildOptions, "conditions" | "env" | "target">
+): string | null {
   if (filename != null && filename !== "/") {
     return filename;
   }
 
   return resolvePackageExport(packageJson as Parameters<typeof resolvePackageExport>[0], "/", {
-    conditions: ["browser", "production", "import", "module", "default"],
-    useBrowserField: true,
-    useModuleField: true,
+    conditions: getBuildConditions(options),
+    useBrowserField: !isRuntimeNativeTarget(options.target),
+    useModuleField: packageJson.exports == null,
   });
+}
+
+function parseConditions(searchParams: URLSearchParams): string[] {
+  return searchParams.has("conditions")
+    ? searchParams.getAll("conditions").flatMap((condition) => condition.split(",")).filter(Boolean)
+    : [];
+}
+
+function getBuildConditions(options: Pick<NormalizedBuildOptions, "conditions" | "env" | "target">): string[] {
+  let runtimeConditions = isRuntimeNativeTarget(options.target)
+    ? [options.target === "denonext" ? "deno" : options.target]
+    : ["browser"];
+  let envConditions = options.env === "development" ? ["development"] : ["production"];
+  let defaults = ["import", "module", "default"];
+  let conditions = [...options.conditions, ...runtimeConditions, ...envConditions, ...defaults];
+
+  return Array.from(new Set(conditions));
 }
 
 function isJavaScriptContentType(contentType: string): boolean {
