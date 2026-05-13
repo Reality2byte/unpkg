@@ -644,7 +644,7 @@ function createHomePage(env: Env): string {
   let tsxExampleHtml = highlightCode(homePageTsxExample.replaceAll("%%ESM_ORIGIN%%", esmOrigin));
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background-color: white;">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -812,7 +812,7 @@ function createHomePage(env: Env): string {
     }
   </style>
 </head>
-<body>
+<body style="background-color: white;">
   <header>
     <h1>UNPKG ESM</h1>
   </header>

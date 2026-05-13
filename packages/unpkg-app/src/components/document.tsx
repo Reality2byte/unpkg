@@ -25,7 +25,7 @@ export function Document({
   };
 
   return (
-    <html lang="en">
+    <html lang="en" style={{ backgroundColor: "white" }}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -50,7 +50,7 @@ gtag('config', 'UA-140352188-1');`,
           }}
         ></script>
       </head>
-      <body>{children}</body>
+      <body style={{ backgroundColor: "white" }}>{children}</body>
     </html>
   );
 }
