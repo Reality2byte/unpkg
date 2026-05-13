@@ -338,6 +338,57 @@ function createRuntimeSmokeCases(): RuntimeSmokeCase[] {
           return ["CSSStyleSheet", "adoptedStyleSheets"];
         }, origin),
     },
+    {
+      case: {
+        category: "runtime",
+        description: "Worker wrapper starts a module worker",
+        expect: "module",
+        features: ["runtime", "worker"],
+        package: "uuid",
+        path: "/__runtime/worker-wrapper",
+      },
+      run: async (page, origin) => {
+        await page.goto(`${origin}/_health`);
+        return page.evaluate(async (esmOrigin) => {
+          let { default: createWorker } = await import(`${esmOrigin}/uuid@14.0.0?worker`);
+          let worker = createWorker({ name: "esm-unpkg-browser-smoke" });
+          try {
+            await new Promise<void>((resolve, reject) => {
+              let timeout = setTimeout(resolve, 500);
+              worker.addEventListener("error", (event) => {
+                clearTimeout(timeout);
+                reject(new Error(event.message || "Worker failed to start"));
+              }, { once: true });
+            });
+          } finally {
+            worker.terminate();
+          }
+          return ["Worker", "createWorker"];
+        }, origin);
+      },
+    },
+    {
+      case: {
+        category: "runtime",
+        description: "Inline TSX helper transforms browser scripts",
+        expect: "module",
+        features: ["runtime", "tsx"],
+        path: "/__runtime/inline-tsx-helper",
+      },
+      run: async (page, origin) => {
+        await page.setContent([
+          "<!doctype html><html><body>",
+          '<script type="text/ts">window.__esmUnpkgInlineValue = 21 as number;</script>',
+          "</body></html>",
+        ].join(""));
+        await page.addScriptTag({
+          type: "module",
+          url: `${origin}/tsx`,
+        });
+        await page.waitForFunction(() => globalThis.__esmUnpkgInlineValue === 21);
+        return ["tsx", "transform"];
+      },
+    },
   ];
 }
 

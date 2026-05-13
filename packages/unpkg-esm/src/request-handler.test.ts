@@ -161,6 +161,15 @@ describe("handleRequest", () => {
         message: "?dev cannot be combined with ?env=production",
       },
     });
+
+    response = await dispatchFetch("https://esm.unpkg.com/react@18.2.0?raw&target=es2022");
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "INVALID_QUERY",
+        message: "?raw cannot be combined with ?target",
+      },
+    });
   });
 
   it("proxies build artifacts from the files origin", async () => {
@@ -187,6 +196,17 @@ describe("handleRequest", () => {
     let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
     expect(response.status).toBe(200);
     expect(response.headers.get("X-TypeScript-Types")).toBe("https://esm.unpkg.com/preact@10.26.4/src/index.d.ts");
+  });
+
+  it("omits TypeScript declaration headers with no-dts", async () => {
+    let redirectResponse = await dispatchFetch("https://esm.unpkg.com/preact@10.26.4?no-dts", {
+      redirect: "manual",
+    });
+    expect(redirectResponse.status).toBe(301);
+
+    let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
+    expect(response.status).toBe(200);
+    expect(response.headers.has("X-TypeScript-Types")).toBe(false);
   });
 
   it("serves raw files without adding a default target", async () => {

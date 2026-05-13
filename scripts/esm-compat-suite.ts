@@ -143,91 +143,9 @@ interface ManagedService {
 }
 
 const defaultConcurrency = 6;
+const defaultCorpusPath = "scripts/esm-compat-corpus.seed.json";
 const defaultTimeoutMs = 15_000;
 const maxFetchRetries = 1;
-
-const defaultCases: CompatCase[] = [
-  {
-    category: "package-root",
-    description: "React package root",
-    expect: "module",
-    features: ["package-root", "version"],
-    package: "react",
-    path: "/react@18.3.1",
-  },
-  {
-    category: "subpath",
-    description: "React DOM client subpath",
-    expect: "module",
-    features: ["subpath", "version"],
-    package: "react-dom",
-    path: "/react-dom@18.3.1/client",
-  },
-  {
-    category: "external",
-    description: "External all shorthand",
-    expect: "module",
-    features: ["external-all"],
-    package: "swr",
-    path: "/*swr@1.3.0",
-  },
-  {
-    category: "dependency-control",
-    description: "Dependency override",
-    expect: "module",
-    features: ["deps"],
-    package: "react-dom",
-    path: "/react-dom@18.3.1/client?deps=react@18.2.0",
-  },
-  {
-    category: "dependency-control",
-    description: "Alias React to Preact compat",
-    expect: "module",
-    features: ["alias", "deps"],
-    package: "react-dom",
-    path: "/react-dom@18.3.1/client?alias=react:preact/compat&deps=preact@10.25.4",
-  },
-  {
-    category: "bundling",
-    description: "No-bundle mode",
-    expect: "module",
-    features: ["no-bundle"],
-    package: "preact",
-    path: "/preact@10.26.4/hooks?no-bundle",
-  },
-  {
-    category: "metadata",
-    description: "Metadata",
-    expect: "json",
-    features: ["meta"],
-    package: "preact",
-    path: "/preact@10.26.4?meta",
-  },
-  {
-    category: "worker",
-    description: "Worker wrapper",
-    expect: "module",
-    features: ["worker"],
-    package: "preact",
-    path: "/preact@10.26.4?worker",
-  },
-  {
-    category: "runtime-target",
-    description: "Runtime-native target",
-    expect: "module",
-    features: ["target-node"],
-    package: "react",
-    path: "/react@18.3.1?target=node",
-  },
-  {
-    category: "diagnostic",
-    description: "Unsupported source diagnostic",
-    expect: "diagnostic",
-    features: ["unsupported-source"],
-    package: "preact",
-    path: "/preact@10.26.4/component.vue",
-  },
-];
 
 let options = parseArgs(process.argv.slice(2));
 let esmShOrigin = stripTrailingSlash(process.env.ESM_SH_ORIGIN ?? "https://esm.sh");
@@ -272,11 +190,7 @@ if (!options.dryRun && report.summary.failed > 0) {
 
 async function loadCorpus(corpusPath: string | null): Promise<CompatCorpus> {
   if (corpusPath == null) {
-    return {
-      cases: defaultCases,
-      description: "Built-in representative esm.sh compatibility scenarios.",
-      name: "default",
-    };
+    return loadCorpus(defaultCorpusPath);
   }
 
   let text = await readFile(corpusPath, "utf8");

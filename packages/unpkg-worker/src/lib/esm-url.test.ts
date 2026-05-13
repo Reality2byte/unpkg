@@ -47,6 +47,13 @@ describe("normalizeEsmRequestUrl", () => {
     expect("url" in result && result.url.search).toBe("?dev=&target=es2022");
   });
 
+  it("normalizes import-map-friendly trailing slash query syntax", () => {
+    let result = normalizeEsmRequestUrl("https://esm.unpkg.com/react-dom@18.3.1&dev/");
+
+    expect("url" in result && result.url.pathname).toBe("/react-dom@18.3.1/");
+    expect("url" in result && result.url.search).toBe("?dev=&target=es2022");
+  });
+
   it("accepts runtime-native esm.sh compatibility targets", () => {
     let result = normalizeEsmRequestUrl("https://esm.unpkg.com/react?target=node");
 
@@ -65,6 +72,14 @@ describe("normalizeEsmRequestUrl", () => {
     let result = normalizeEsmRequestUrl("https://esm.unpkg.com/react@18/package.json?raw");
 
     expect("url" in result && result.url.search).toBe("?raw=");
+  });
+
+  it("rejects raw mode with transform options", () => {
+    expect(normalizeEsmRequestUrl("https://esm.unpkg.com/react@18?raw&target=es2022")).toEqual({
+      code: "INVALID_QUERY",
+      message: "?raw cannot be combined with ?target",
+      status: 400,
+    });
   });
 
   it("does not add a default target to CSS requests", () => {
