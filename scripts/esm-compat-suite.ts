@@ -11,6 +11,7 @@ type FailureCategory =
   | "redirect-mismatch"
   | "server-error"
   | "unexpected-success";
+type OutputMode = "json" | "ndjson" | "text";
 
 interface CompatCase {
   category?: string;
@@ -48,11 +49,13 @@ interface FetchSummary {
 
 interface CompatResult {
   case: CompatCase;
+  index: number;
   esmSh: FetchSummary;
   esmUnpkg: FetchSummary;
   failureCategory: FailureCategory | null;
   passed: boolean;
   reason: string | null;
+  retryCount: number;
 }
 
 interface CompatReport {
@@ -79,6 +82,7 @@ interface CompatSummary {
 }
 
 interface RunOptions {
+  autoRestartLocalServices: boolean;
   concurrency: number;
   skipBaseline: boolean;
   timeoutMs: number;
@@ -87,11 +91,60 @@ interface RunOptions {
 interface ParsedArgs extends RunOptions {
   corpusPath: string | null;
   dryRun: boolean;
-  jsonOutput: boolean;
+  outputMode: OutputMode;
+}
+
+interface NdjsonStartEvent {
+  comparedAt: string;
+  corpus: CompatReport["corpus"];
+  event: "start";
+  origins: CompatReport["origins"];
+  total: number;
+}
+
+interface NdjsonResultEvent {
+  event: "result";
+  progress: {
+    completed: number;
+    failed: number;
+    passed: number;
+    total: number;
+  };
+  result: CompatResult;
+}
+
+interface NdjsonServiceEvent {
+  action: "health-check" | "restart" | "restart-failed" | "restart-skipped";
+  event: "service";
+  message: string;
+  service: string;
+  url: string;
+}
+
+interface NdjsonSummaryEvent {
+  event: "summary";
+  report: CompatReport;
+}
+
+interface Reporter {
+  result(result: CompatResult, summary: CompatSummary): void;
+  service(event: Omit<NdjsonServiceEvent, "event">): void;
+  start(report: Omit<CompatReport, "results" | "summary">, total: number): void;
+  summary(report: CompatReport): void;
+}
+
+interface ManagedService {
+  command: string[];
+  healthUrl: string;
+  name: string;
+  origin: string;
+  port: number | null;
+  process: Bun.Subprocess | null;
 }
 
 const defaultConcurrency = 6;
 const defaultTimeoutMs = 15_000;
+const maxFetchRetries = 1;
 
 const defaultCases: CompatCase[] = [
   {
@@ -179,11 +232,9 @@ const defaultCases: CompatCase[] = [
 let options = parseArgs(process.argv.slice(2));
 let esmShOrigin = stripTrailingSlash(process.env.ESM_SH_ORIGIN ?? "https://esm.sh");
 let esmUnpkgOrigin = stripTrailingSlash(process.env.ESM_UNPKG_ORIGIN ?? "https://esm.unpkg.com");
+let filesOrigin = stripTrailingSlash(process.env.ESM_FILES_ORIGIN ?? "http://localhost:4000");
 let corpus = await loadCorpus(options.corpusPath);
-let results = options.dryRun
-  ? corpus.cases.map(createDryRunResult)
-  : await runCases(corpus.cases, options);
-let report: CompatReport = {
+let reportBase: Omit<CompatReport, "results" | "summary"> = {
   comparedAt: new Date().toISOString(),
   corpus: {
     caseCount: corpus.cases.length,
@@ -194,11 +245,26 @@ let report: CompatReport = {
     esmSh: esmShOrigin,
     esmUnpkg: esmUnpkgOrigin,
   },
+};
+let reporter = createReporter(options.outputMode);
+reporter.start(reportBase, corpus.cases.length);
+let results = options.dryRun
+  ? corpus.cases.map((compatCase, index) => createDryRunResult(compatCase, index))
+  : await runCases(corpus.cases, options, reporter);
+if (options.dryRun) {
+  let dryRunSummary = createEmptySummary(results.length);
+  for (let result of results) {
+    addResultToSummary(dryRunSummary, result);
+    reporter.result(result, dryRunSummary);
+  }
+}
+let report: CompatReport = {
+  ...reportBase,
   results,
   summary: summarizeResults(results),
 };
 
-printReport(report, options.jsonOutput);
+reporter.summary(report);
 
 if (!options.dryRun && report.summary.failed > 0) {
   process.exitCode = 1;
@@ -222,32 +288,60 @@ async function loadCorpus(corpusPath: string | null): Promise<CompatCorpus> {
   return value;
 }
 
-async function runCases(cases: CompatCase[], options: RunOptions): Promise<CompatResult[]> {
-  let firstBatchSize = Math.min(options.concurrency, cases.length);
-  let firstBatch = await runCaseBatch(cases.slice(0, firstBatchSize), options);
-  let unreachableOrigin = findUnreachableOrigin(firstBatch, options);
-  if (unreachableOrigin != null) {
-    console.error(
-      `Unable to connect to ${unreachableOrigin} in the first ${firstBatch.length} compatibility checks. ` +
-        "Aborting the corpus run early."
-    );
-    return firstBatch;
+async function runCases(cases: CompatCase[], options: RunOptions, reporter: Reporter): Promise<CompatResult[]> {
+  let localServices = createLocalServices(options, reporter);
+  await localServices.ensureHealthyBeforeRun();
+
+  let results: CompatResult[] = [];
+  let summary = createEmptySummary(cases.length);
+  let nextIndex = 0;
+
+  async function worker(): Promise<void> {
+    while (nextIndex < cases.length) {
+      let index = nextIndex;
+      nextIndex += 1;
+      let compatCase = cases[index];
+      if (compatCase == null) {
+        continue;
+      }
+
+      let result = await runCaseWithRecovery(compatCase, index, options, localServices);
+      results.push(result);
+      addResultToSummary(summary, result);
+      reporter.result(result, summary);
+    }
   }
 
-  let results = [...firstBatch];
-  for (let index = firstBatchSize; index < cases.length; index += options.concurrency) {
-    let batch = cases.slice(index, index + options.concurrency);
-    results.push(...(await runCaseBatch(batch, options)));
+  await Promise.all(
+    Array.from({ length: Math.min(options.concurrency, cases.length) }, async () => {
+      await worker();
+    })
+  );
+
+  return results.sort((left, right) => left.index - right.index);
+}
+
+async function runCaseWithRecovery(
+  compatCase: CompatCase,
+  index: number,
+  options: RunOptions,
+  localServices: ReturnType<typeof createLocalServices>
+): Promise<CompatResult> {
+  let result = await runCase(compatCase, index, options, 0);
+  if (!shouldRetryWithServiceRecovery(result, options)) {
+    return result;
   }
 
-  return results;
+  let recovered = await localServices.recoverFrom(result);
+  return recovered ? await runCase(compatCase, index, options, 1) : result;
 }
 
-async function runCaseBatch(cases: CompatCase[], options: RunOptions): Promise<CompatResult[]> {
-  return Promise.all(cases.map((compatCase) => runCase(compatCase, options)));
-}
-
-async function runCase(compatCase: CompatCase, options: RunOptions): Promise<CompatResult> {
+async function runCase(
+  compatCase: CompatCase,
+  index: number,
+  options: RunOptions,
+  retryCount: number
+): Promise<CompatResult> {
   let [esmSh, esmUnpkg] = await Promise.all([
     options.skipBaseline
       ? Promise.resolve(unavailableSummary(new URL(compatCase.path, esmShOrigin).toString()))
@@ -258,11 +352,13 @@ async function runCase(compatCase: CompatCase, options: RunOptions): Promise<Com
 
   return {
     case: compatCase,
+    index,
     esmSh,
     esmUnpkg,
     failureCategory: comparison.failureCategory,
     passed: comparison.reason == null,
     reason: comparison.reason,
+    retryCount,
   };
 }
 
@@ -471,49 +567,58 @@ function validateExpectedBehavior(
   return { failureCategory: null, reason: null };
 }
 
-function summarizeResults(results: CompatResult[]): CompatSummary {
-  let summary: CompatSummary = {
+function createEmptySummary(total: number): CompatSummary {
+  return {
     byCategory: {},
     byFailureCategory: {},
     failed: 0,
     passed: 0,
-    total: results.length,
+    total,
   };
+}
 
+function summarizeResults(results: CompatResult[]): CompatSummary {
+  let summary = createEmptySummary(results.length);
   for (let result of results) {
-    if (result.passed) {
-      summary.passed += 1;
-    } else {
-      summary.failed += 1;
-    }
-
-    let category = result.case.category ?? "uncategorized";
-    let categorySummary = summary.byCategory[category] ?? { failed: 0, passed: 0, total: 0 };
-    categorySummary.total += 1;
-    if (result.passed) {
-      categorySummary.passed += 1;
-    } else {
-      categorySummary.failed += 1;
-    }
-    summary.byCategory[category] = categorySummary;
-
-    if (result.failureCategory != null) {
-      summary.byFailureCategory[result.failureCategory] =
-        (summary.byFailureCategory[result.failureCategory] ?? 0) + 1;
-    }
+    addResultToSummary(summary, result);
   }
 
   return summary;
 }
 
-function createDryRunResult(compatCase: CompatCase): CompatResult {
+function addResultToSummary(summary: CompatSummary, result: CompatResult): void {
+  if (result.passed) {
+    summary.passed += 1;
+  } else {
+    summary.failed += 1;
+  }
+
+  let category = result.case.category ?? "uncategorized";
+  let categorySummary = summary.byCategory[category] ?? { failed: 0, passed: 0, total: 0 };
+  categorySummary.total += 1;
+  if (result.passed) {
+    categorySummary.passed += 1;
+  } else {
+    categorySummary.failed += 1;
+  }
+  summary.byCategory[category] = categorySummary;
+
+  if (result.failureCategory != null) {
+    summary.byFailureCategory[result.failureCategory] =
+      (summary.byFailureCategory[result.failureCategory] ?? 0) + 1;
+  }
+}
+
+function createDryRunResult(compatCase: CompatCase, index: number): CompatResult {
   return {
     case: compatCase,
+    index,
     esmSh: pendingSummary(new URL(compatCase.path, esmShOrigin).toString()),
     esmUnpkg: pendingSummary(new URL(compatCase.path, esmUnpkgOrigin).toString()),
     failureCategory: null,
     passed: true,
     reason: null,
+    retryCount: 0,
   };
 }
 
@@ -540,8 +645,53 @@ function unavailableSummary(finalUrl: string): FetchSummary {
   };
 }
 
-function printReport(report: CompatReport, jsonOutput: boolean): void {
-  if (jsonOutput) {
+function createReporter(outputMode: OutputMode): Reporter {
+  if (outputMode === "ndjson") {
+    return {
+      result(result, summary) {
+        printNdjson({
+          event: "result",
+          progress: {
+            completed: summary.passed + summary.failed,
+            failed: summary.failed,
+            passed: summary.passed,
+            total: summary.total,
+          },
+          result,
+        } satisfies NdjsonResultEvent);
+      },
+      service(event) {
+        printNdjson({ event: "service", ...event } satisfies NdjsonServiceEvent);
+      },
+      start(report, total) {
+        printNdjson({ event: "start", total, ...report } satisfies NdjsonStartEvent);
+      },
+      summary(report) {
+        printNdjson({ event: "summary", report } satisfies NdjsonSummaryEvent);
+      },
+    };
+  }
+
+  return {
+    result() {},
+    service(event) {
+      if (event.action === "restart" || event.action === "restart-failed") {
+        console.error(`${event.service}: ${event.message}`);
+      }
+    },
+    start() {},
+    summary(report) {
+      printReport(report, outputMode);
+    },
+  };
+}
+
+function printNdjson(value: NdjsonStartEvent | NdjsonResultEvent | NdjsonServiceEvent | NdjsonSummaryEvent): void {
+  console.log(JSON.stringify(value));
+}
+
+function printReport(report: CompatReport, outputMode: OutputMode): void {
+  if (outputMode === "json") {
     console.log(JSON.stringify(report, null, 2));
     return;
   }
@@ -566,22 +716,6 @@ function printReport(report: CompatReport, jsonOutput: boolean): void {
       console.log(`  ${category}: ${count}`);
     }
   }
-}
-
-function findUnreachableOrigin(results: CompatResult[], options: RunOptions): string | null {
-  if (results.length === 0) {
-    return null;
-  }
-
-  if (results.every((result) => result.esmUnpkg.diagnosticCode === "FETCH_ERROR")) {
-    return esmUnpkgOrigin;
-  }
-
-  if (!options.skipBaseline && results.every((result) => result.esmSh.diagnosticCode === "FETCH_ERROR")) {
-    return esmShOrigin;
-  }
-
-  return null;
 }
 
 function readDiagnosticCode(text: string, contentType: string | null): string | null {
@@ -683,11 +817,225 @@ function stripTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
 }
 
+function createLocalServices(options: RunOptions, reporter: Reporter) {
+  let services = [
+    createManagedService("esm.sh", esmShOrigin, "/react@18.3.1", ["pnpm", "vendor:esm-sh"]),
+    createManagedService("esm.unpkg", esmUnpkgOrigin, "/_health", [
+      "pnpm",
+      "--filter",
+      "unpkg-esm",
+      "exec",
+      "wrangler",
+      "dev",
+      "--env",
+      "dev",
+      "--port",
+      "3002",
+      "--ip",
+      "127.0.0.1",
+    ]),
+    createManagedService("unpkg-files", filesOrigin, "/_health", ["pnpm", "--filter", "unpkg-files", "dev"]),
+  ].filter((service): service is ManagedService => service != null);
+  let restarts = new Map<string, Promise<boolean>>();
+
+  async function ensureHealthyBeforeRun(): Promise<void> {
+    if (!options.autoRestartLocalServices) {
+      return;
+    }
+
+    for (let service of services) {
+      if (!(await isServiceHealthy(service))) {
+        await restartService(service, "service was not reachable before the corpus run");
+      }
+    }
+  }
+
+  async function recoverFrom(result: CompatResult): Promise<boolean> {
+    if (!options.autoRestartLocalServices) {
+      return false;
+    }
+
+    let recovered = false;
+    let impactedServices = getImpactedServices(result);
+    for (let service of impactedServices) {
+      reporter.service({
+        action: "health-check",
+        message: "checking service after a fetch error",
+        service: service.name,
+        url: service.healthUrl,
+      });
+
+      if (!(await isServiceHealthy(service))) {
+        recovered = (await restartService(service, "service became unreachable during the corpus run")) || recovered;
+      }
+    }
+
+    return recovered;
+  }
+
+  function getImpactedServices(result: CompatResult): ManagedService[] {
+    let impacted = new Set<ManagedService>();
+    let esmUnpkg = services.find((service) => service.name === "esm.unpkg");
+    let unpkgFiles = services.find((service) => service.name === "unpkg-files");
+    let esmSh = services.find((service) => service.name === "esm.sh");
+
+    if (result.esmUnpkg.diagnosticCode === "FETCH_ERROR") {
+      if (esmUnpkg != null) {
+        impacted.add(esmUnpkg);
+      }
+      if (unpkgFiles != null) {
+        impacted.add(unpkgFiles);
+      }
+    }
+
+    if (!options.skipBaseline && result.esmSh.diagnosticCode === "FETCH_ERROR" && esmSh != null) {
+      impacted.add(esmSh);
+    }
+
+    return [...impacted];
+  }
+
+  async function restartService(service: ManagedService, reason: string): Promise<boolean> {
+    let existingRestart = restarts.get(service.name);
+    if (existingRestart != null) {
+      return existingRestart;
+    }
+
+    let restart = restartServiceInner(service, reason).finally(() => {
+      restarts.delete(service.name);
+    });
+    restarts.set(service.name, restart);
+    return restart;
+  }
+
+  async function restartServiceInner(service: ManagedService, reason: string): Promise<boolean> {
+    reporter.service({
+      action: "restart",
+      message: reason,
+      service: service.name,
+      url: service.healthUrl,
+    });
+
+    service.process?.kill();
+    service.process = null;
+
+    if (service.port != null) {
+      await killLocalPort(service.port);
+    }
+
+    service.process = Bun.spawn(service.command, {
+      cwd: process.cwd(),
+      env: process.env,
+      stderr: "ignore",
+      stdin: "ignore",
+      stdout: "ignore",
+    });
+    unrefProcess(service.process);
+
+    let healthy = await waitForService(service, options.timeoutMs);
+    if (!healthy) {
+      reporter.service({
+        action: "restart-failed",
+        message: `service did not become healthy after running ${service.command.join(" ")}`,
+        service: service.name,
+        url: service.healthUrl,
+      });
+    }
+
+    return healthy;
+  }
+
+  return { ensureHealthyBeforeRun, recoverFrom };
+}
+
+function unrefProcess(process: Bun.Subprocess): void {
+  let maybeUnref = process as Bun.Subprocess & { unref?: () => void };
+  maybeUnref.unref?.();
+}
+
+function createManagedService(
+  name: string,
+  origin: string,
+  healthPath: string,
+  command: string[]
+): ManagedService | null {
+  let url: URL;
+  try {
+    url = new URL(origin);
+  } catch {
+    return null;
+  }
+
+  if (!isLocalHost(url.hostname)) {
+    return null;
+  }
+
+  let port = Number(url.port);
+  return {
+    command,
+    healthUrl: new URL(healthPath, origin).toString(),
+    name,
+    origin,
+    port: Number.isInteger(port) && port > 0 ? port : null,
+    process: null,
+  };
+}
+
+async function isServiceHealthy(service: ManagedService): Promise<boolean> {
+  try {
+    let response = await fetch(service.healthUrl, {
+      signal: AbortSignal.timeout(5_000),
+      headers: {
+        Accept: "application/javascript, application/json, text/plain;q=0.9, */*;q=0.1",
+      },
+    });
+    return response.status < 500;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForService(service: ManagedService, timeoutMs: number): Promise<boolean> {
+  let deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await isServiceHealthy(service)) {
+      return true;
+    }
+    await Bun.sleep(500);
+  }
+
+  return false;
+}
+
+async function killLocalPort(port: number): Promise<void> {
+  await Bun.spawn(["sh", "-c", `pids=$(lsof -ti tcp:${port}); if [ -n "$pids" ]; then kill $pids; fi`], {
+    stderr: "ignore",
+    stdout: "ignore",
+  }).exited;
+  await Bun.sleep(500);
+}
+
+function shouldRetryWithServiceRecovery(result: CompatResult, options: RunOptions): boolean {
+  if (result.retryCount >= maxFetchRetries) {
+    return false;
+  }
+
+  return (
+    result.esmUnpkg.diagnosticCode === "FETCH_ERROR" ||
+    (!options.skipBaseline && result.esmSh.diagnosticCode === "FETCH_ERROR")
+  );
+}
+
+function isLocalHost(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]" || hostname === "::1";
+}
+
 function parseArgs(args: string[]): ParsedArgs {
+  let autoRestartLocalServices = true;
   let corpusPath: string | null = null;
   let concurrency = defaultConcurrency;
   let dryRun = false;
-  let jsonOutput = false;
+  let outputMode: OutputMode = "text";
   let skipBaseline = false;
   let timeoutMs = defaultTimeoutMs;
 
@@ -696,7 +1044,11 @@ function parseArgs(args: string[]): ParsedArgs {
     if (arg === "--dry-run") {
       dryRun = true;
     } else if (arg === "--json") {
-      jsonOutput = true;
+      outputMode = "json";
+    } else if (arg === "--ndjson") {
+      outputMode = "ndjson";
+    } else if (arg === "--no-restart-local-services") {
+      autoRestartLocalServices = false;
     } else if (arg === "--skip-baseline") {
       skipBaseline = true;
     } else if (arg === "--corpus") {
@@ -719,7 +1071,7 @@ function parseArgs(args: string[]): ParsedArgs {
     }
   }
 
-  return { concurrency, corpusPath, dryRun, jsonOutput, skipBaseline, timeoutMs };
+  return { autoRestartLocalServices, concurrency, corpusPath, dryRun, outputMode, skipBaseline, timeoutMs };
 }
 
 function parsePositiveInteger(value: string | undefined, name: string): number {

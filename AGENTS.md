@@ -39,5 +39,6 @@ This repository powers UNPKG, a CDN and web app for serving npm package files di
 - Run a corpus with `pnpm test:esm-compat -- --corpus scripts/esm-compat-corpus.ecosystem.json`.
 - Start the local esm.sh baseline with `pnpm vendor:esm-sh`, then compare against it with `pnpm test:esm-compat:local-baseline -- --corpus scripts/esm-compat-corpus.ecosystem.json`.
 - Use `--dry-run` to validate and print corpus cases without network requests.
+- Use `--ndjson` for long corpus runs so progress and per-case failures stream as newline-delimited JSON.
 - For live runs, set `ESM_UNPKG_ORIGIN` to the local, staging, or beta origin you intend to test. The default is `https://esm.unpkg.com`.
-- The compatibility runner limits live checks with `--concurrency` and `--timeout-ms`, and aborts early when the first batch cannot connect to an origin.
+- The compatibility runner limits live checks with `--concurrency` and `--timeout-ms`, and can restart localhost `esm.sh`, `unpkg-esm`, or `unpkg-files` services when a local service becomes unreachable.
