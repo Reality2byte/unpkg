@@ -1,6 +1,11 @@
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 
 import {
+  bundleSource,
   normalizeBuildOptions,
   parseAliases,
   parseDependencyOverrides,
@@ -291,6 +296,72 @@ describe("transformSource", () => {
     );
 
     expect(result.code.trim()).toMatch(/^const \w=3;export\{\w as value\};$/);
+  });
+});
+
+describe("bundleSource", () => {
+  it("bundles package self-references as package-internal imports", async () => {
+    let packageDirectory = await mkdtemp(path.join(tmpdir(), "unpkg-esm-self-reference-"));
+
+    try {
+      await writeFile(
+        path.join(packageDirectory, "package.json"),
+        JSON.stringify({
+          name: "self-referencing-package",
+          exports: {
+            ".": "./index.js",
+            "./client": "./client.js",
+          },
+        })
+      );
+      await writeFile(path.join(packageDirectory, "index.js"), "exports.createRoot = () => 'ok';");
+      await writeFile(
+        path.join(packageDirectory, "client.js"),
+        "var root = require('self-referencing-package'); exports.createRoot = root.createRoot;"
+      );
+
+      let result = await bundleSource(
+        packageDirectory,
+        {
+          name: "self-referencing-package",
+          exports: {
+            ".": "./index.js",
+            "./client": "./client.js",
+          },
+        },
+        "self-referencing-package",
+        "1.0.0",
+        "/client.js",
+        "var root = require('self-referencing-package'); exports.createRoot = root.createRoot;",
+        options()
+      );
+
+      expect(result.code).not.toContain('Dynamic require of "self-referencing-package"');
+      expect(result.code).toContain("createRoot");
+    } finally {
+      await rm(packageDirectory, { force: true, recursive: true });
+    }
+  });
+
+  it("converts CommonJS dependency requires into static ESM imports", async () => {
+    let packageDirectory = await mkdtemp(path.join(tmpdir(), "unpkg-esm-dependency-require-"));
+
+    try {
+      let result = await bundleSource(
+        packageDirectory,
+        { name: "dependency-require-package" },
+        "dependency-require-package",
+        "1.0.0",
+        "/index.js",
+        "var React = require('react'); exports.version = React.version;",
+        options()
+      );
+
+      expect(result.code).not.toContain('Dynamic require of "react"');
+      expect(result.code).toContain('from "react"');
+    } finally {
+      await rm(packageDirectory, { force: true, recursive: true });
+    }
   });
 });
 

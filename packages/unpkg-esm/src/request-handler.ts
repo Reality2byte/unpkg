@@ -9,6 +9,7 @@ import type { EsmRequestError, PackageJson } from "unpkg-worker";
 import type { Env } from "./env.ts";
 
 const publicNpmRegistry = "https://registry.npmjs.org";
+const filesBuildCacheVersion = "2";
 
 export async function handleRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
   let url = new URL(request.url);
@@ -160,6 +161,7 @@ export async function handleRequest(request: Request, env: Env, context: Executi
 
   let buildSearchParams = new URLSearchParams(searchParams);
   buildSearchParams.set("origin", normalized.url.origin);
+  buildSearchParams.set("__unpkg-build-cache", filesBuildCacheVersion);
   let buildResponse = await fetch(
     new URL(`/build/${packageName}@${version}${packagePath.filename ?? ""}${normalizeSearch(buildSearchParams)}`, env.FILES_ORIGIN)
   );
@@ -262,6 +264,7 @@ async function getBuildIntegrity(
 
   let buildSearchParams = new URLSearchParams(searchParams);
   buildSearchParams.set("origin", origin);
+  buildSearchParams.set("__unpkg-build-cache", filesBuildCacheVersion);
   let response: Response;
   try {
     response = await fetch(

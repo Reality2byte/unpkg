@@ -206,7 +206,7 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
     request.options.bundleMode === "none"
       ? await transformSource(code, filename, request.options)
       : await withPackageFileDirectory(registry, request.packageName, request.version, (packageDirectory) =>
-          bundleSource(packageDirectory, request.packageName, request.version, filename, code, request.options)
+          bundleSource(packageDirectory, packageJson, request.packageName, request.version, filename, code, request.options)
         );
   let rewritten = await rewriteEsmImports(transformed.code, registry, request.options.origin, deps, request.options);
   let buildKey = createBuildKey(request, filename);
@@ -352,6 +352,7 @@ export async function rewriteEsmImports(
 
 export async function bundleSource(
   packageDirectory: string,
+  packageJson: PackageJson,
   packageName: string,
   version: string,
   filename: string,
@@ -371,7 +372,7 @@ export async function bundleSource(
     jsxImportSource: options.jsxImportSource,
     keepNames: options.keepNames,
     minify: options.minify,
-    plugins: [createPackageInternalBundlePlugin(packageDirectory, packageName, version)],
+    plugins: [createPackageInternalBundlePlugin(packageDirectory, packageJson, packageName, version, options)],
     sourcemap: options.sourcemap ? "inline" : false,
     stdin: {
       contents: code,
@@ -583,8 +584,10 @@ function addCommonJsNamedExports(code: string, exportNames: string[]): string {
 
 function createPackageInternalBundlePlugin(
   packageDirectory: string,
+  packageJson: PackageJson,
   packageName: string,
-  version: string
+  version: string,
+  options: NormalizedBuildOptions
 ): esbuild.Plugin {
   return {
     name: "unpkg-package-internal",
@@ -594,6 +597,10 @@ function createPackageInternalBundlePlugin(
           return null;
         }
 
+        if (args.namespace === "unpkg-external-module") {
+          return { path: args.path, external: true };
+        }
+
         if (isUnsupportedSourceFile(args.path)) {
           return {
             path: args.path,
@@ -601,7 +608,25 @@ function createPackageInternalBundlePlugin(
           };
         }
 
-        if (isBareSpecifier(args.path) || isValidUrl(args.path)) {
+        if (isBareSpecifier(args.path)) {
+          let parsed = parseBareSpecifier(args.path);
+          if (parsed?.packageName === packageName) {
+            let selfReferencePath = parsed.path === "" ? "/" : parsed.path;
+            let resolved = resolveBuildFilename(packageJson, selfReferencePath, options) ?? selfReferencePath;
+
+            return {
+              path: resolved,
+              namespace: "unpkg-package",
+            };
+          }
+
+          return {
+            path: args.path,
+            namespace: "unpkg-external-module",
+          };
+        }
+
+        if (isValidUrl(args.path)) {
           return { path: args.path, external: true };
         }
 
@@ -635,6 +660,18 @@ function createPackageInternalBundlePlugin(
         contents: "",
         loader: "js",
       }));
+
+      build.onLoad({ filter: /.*/, namespace: "unpkg-external-module" }, (args) => {
+        let specifier = JSON.stringify(args.path);
+
+        return {
+          contents: [
+            `import * as namespace from ${specifier};`,
+            "module.exports = namespace.default ?? namespace;",
+          ].join("\n"),
+          loader: "js",
+        };
+      });
     },
   };
 }
