@@ -1,5 +1,6 @@
 dist/
 node_modules/
+.reports/
 
 # `pnpm deploy` output
 dist-app/

@@ -9,6 +9,7 @@
   "scripts": {
     "build": "pnpm -r run build",
     "clean": "git clean -fdX .",
+    "clean:reports": "node -e \"fs.rmSync('.reports', { recursive: true, force: true }); fs.mkdirSync('.reports', { recursive: true });\"",
     "pretest": "pnpm run build",
     "test": "pnpm -r test",
     "test:esm-browser": "bun scripts/esm-browser-smoke.ts",
