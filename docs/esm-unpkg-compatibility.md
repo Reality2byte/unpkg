@@ -21,6 +21,10 @@ Useful options:
 - `--corpus <path>` runs a checked-in or generated corpus file instead of the built-in seed cases.
 - `--dry-run` prints the cases without making network requests.
 - `--json` emits machine-readable results with response headers, redirect chains, diagnostic categories, content lengths, durations, and grouped summaries for dashboards or CI artifacts.
+- `--concurrency <count>` limits live checks to a small number of cases at a time. The default is `6`.
+- `--timeout-ms <ms>` limits each live fetch attempt. The default is `15000`.
+
+Live runs execute an initial batch first. If that batch cannot connect to either origin, the runner exits early instead of attempting the full corpus.
 
 The built-in seed suite is also available as `scripts/esm-compat-corpus.seed.json`. It covers package roots, subpaths, `?deps`, `?alias`, `?external` shorthand, no-bundle mode, metadata, worker wrappers, runtime-native targets, and unsupported source diagnostics. The launch gate should expand this list with the agreed top-100 npm package set before `esm.unpkg.com` is promoted from beta.
 

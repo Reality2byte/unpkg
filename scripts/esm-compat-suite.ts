@@ -78,6 +78,20 @@ interface CompatSummary {
   total: number;
 }
 
+interface RunOptions {
+  concurrency: number;
+  timeoutMs: number;
+}
+
+interface ParsedArgs extends RunOptions {
+  corpusPath: string | null;
+  dryRun: boolean;
+  jsonOutput: boolean;
+}
+
+const defaultConcurrency = 6;
+const defaultTimeoutMs = 15_000;
+
 const defaultCases: CompatCase[] = [
   {
     category: "package-root",
@@ -167,7 +181,7 @@ let esmUnpkgOrigin = stripTrailingSlash(process.env.ESM_UNPKG_ORIGIN ?? "https:/
 let corpus = await loadCorpus(options.corpusPath);
 let results = options.dryRun
   ? corpus.cases.map(createDryRunResult)
-  : await runCases(corpus.cases);
+  : await runCases(corpus.cases, options);
 let report: CompatReport = {
   comparedAt: new Date().toISOString(),
   corpus: {
@@ -207,14 +221,35 @@ async function loadCorpus(corpusPath: string | null): Promise<CompatCorpus> {
   return value;
 }
 
-async function runCases(cases: CompatCase[]): Promise<CompatResult[]> {
-  return Promise.all(cases.map(runCase));
+async function runCases(cases: CompatCase[], options: RunOptions): Promise<CompatResult[]> {
+  let firstBatchSize = Math.min(options.concurrency, cases.length);
+  let firstBatch = await runCaseBatch(cases.slice(0, firstBatchSize), options);
+  let unreachableOrigin = findUnreachableOrigin(firstBatch);
+  if (unreachableOrigin != null) {
+    console.error(
+      `Unable to connect to ${unreachableOrigin} in the first ${firstBatch.length} compatibility checks. ` +
+        "Aborting the corpus run early."
+    );
+    return firstBatch;
+  }
+
+  let results = [...firstBatch];
+  for (let index = firstBatchSize; index < cases.length; index += options.concurrency) {
+    let batch = cases.slice(index, index + options.concurrency);
+    results.push(...(await runCaseBatch(batch, options)));
+  }
+
+  return results;
 }
 
-async function runCase(compatCase: CompatCase): Promise<CompatResult> {
+async function runCaseBatch(cases: CompatCase[], options: RunOptions): Promise<CompatResult[]> {
+  return Promise.all(cases.map((compatCase) => runCase(compatCase, options)));
+}
+
+async function runCase(compatCase: CompatCase, options: RunOptions): Promise<CompatResult> {
   let [esmSh, esmUnpkg] = await Promise.all([
-    summarizeFetch(new URL(compatCase.path, esmShOrigin)),
-    summarizeFetch(new URL(compatCase.path, esmUnpkgOrigin)),
+    summarizeFetch(new URL(compatCase.path, esmShOrigin), options),
+    summarizeFetch(new URL(compatCase.path, esmUnpkgOrigin), options),
   ]);
   let comparison = compareSummaries(compatCase, esmSh, esmUnpkg);
 
@@ -228,7 +263,7 @@ async function runCase(compatCase: CompatCase): Promise<CompatResult> {
   };
 }
 
-async function summarizeFetch(url: URL): Promise<FetchSummary> {
+async function summarizeFetch(url: URL, options: RunOptions): Promise<FetchSummary> {
   let startedAt = performance.now();
   let currentUrl = url;
   let redirectChain: RedirectHop[] = [];
@@ -238,6 +273,7 @@ async function summarizeFetch(url: URL): Promise<FetchSummary> {
     for (let index = 0; index < 10; index += 1) {
       response = await fetch(currentUrl, {
         redirect: "manual",
+        signal: AbortSignal.timeout(options.timeoutMs),
         headers: {
           Accept: "application/javascript, application/json;q=0.9, */*;q=0.1",
         },
@@ -467,6 +503,22 @@ function printReport(report: CompatReport, jsonOutput: boolean): void {
   }
 }
 
+function findUnreachableOrigin(results: CompatResult[]): string | null {
+  if (results.length === 0) {
+    return null;
+  }
+
+  if (results.every((result) => result.esmUnpkg.diagnosticCode === "FETCH_ERROR")) {
+    return esmUnpkgOrigin;
+  }
+
+  if (results.every((result) => result.esmSh.diagnosticCode === "FETCH_ERROR")) {
+    return esmShOrigin;
+  }
+
+  return null;
+}
+
 function readDiagnosticCode(text: string, contentType: string | null): string | null {
   if (!isJson(contentType)) {
     return null;
@@ -566,10 +618,12 @@ function stripTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
 }
 
-function parseArgs(args: string[]): { corpusPath: string | null; dryRun: boolean; jsonOutput: boolean } {
+function parseArgs(args: string[]): ParsedArgs {
   let corpusPath: string | null = null;
+  let concurrency = defaultConcurrency;
   let dryRun = false;
   let jsonOutput = false;
+  let timeoutMs = defaultTimeoutMs;
 
   for (let index = 0; index < args.length; index += 1) {
     let arg = args[index];
@@ -582,10 +636,29 @@ function parseArgs(args: string[]): { corpusPath: string | null; dryRun: boolean
       index += 1;
     } else if (arg.startsWith("--corpus=")) {
       corpusPath = arg.slice("--corpus=".length);
+    } else if (arg === "--concurrency") {
+      concurrency = parsePositiveInteger(args[index + 1], "--concurrency");
+      index += 1;
+    } else if (arg.startsWith("--concurrency=")) {
+      concurrency = parsePositiveInteger(arg.slice("--concurrency=".length), "--concurrency");
+    } else if (arg === "--timeout-ms") {
+      timeoutMs = parsePositiveInteger(args[index + 1], "--timeout-ms");
+      index += 1;
+    } else if (arg.startsWith("--timeout-ms=")) {
+      timeoutMs = parsePositiveInteger(arg.slice("--timeout-ms=".length), "--timeout-ms");
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
   }
 
-  return { corpusPath, dryRun, jsonOutput };
+  return { concurrency, corpusPath, dryRun, jsonOutput, timeoutMs };
+}
+
+function parsePositiveInteger(value: string | undefined, name: string): number {
+  let number = value == null ? NaN : Number(value);
+  if (!Number.isInteger(number) || number < 1) {
+    throw new Error(`${name} must be a positive integer`);
+  }
+
+  return number;
 }
