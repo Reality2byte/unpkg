@@ -140,7 +140,7 @@ Exit criteria:
 
 - Metadata shape is stable and documented.
 - Type headers and declaration URLs are correct for common package layouts.
-- Integrity is computed for immutable artifacts and is usable by clients.
+- Integrity is computed for build artifacts and is usable by clients.
 
 ## Phase 9: Performance, Cache, and Reliability Beta
 

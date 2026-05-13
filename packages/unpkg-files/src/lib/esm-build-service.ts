@@ -13,6 +13,7 @@ import type { PackageInfo } from "unpkg-worker";
 import { getFile, withPackageFileDirectory } from "./npm-files.ts";
 
 const defaultEsmOrigin = "https://esm.unpkg.com";
+const moduleCacheControl = "public, max-age=60, s-maxage=300";
 const hardNodeBuiltins = new Set([
   "child_process",
   "cluster",
@@ -222,7 +223,7 @@ export async function buildEsmModule(registry: string, request: BuildRequest): P
   return {
     code: rewritten,
     headers: {
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": moduleCacheControl,
       "Content-Type": "application/javascript; charset=utf-8",
       "X-UNPKG-Bundle-Mode": request.options.bundleMode,
       "X-UNPKG-Build-Key": buildKey,
@@ -271,7 +272,7 @@ export async function transformInlineEsmModule(registry: string, request: Inline
   return {
     code: rewritten,
     headers: {
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": moduleCacheControl,
       "Content-Type": "application/javascript; charset=utf-8",
       "X-UNPKG-Bundle-Mode": request.options.bundleMode,
       "X-UNPKG-Build-Key": buildKey,

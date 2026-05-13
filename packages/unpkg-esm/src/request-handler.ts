@@ -9,7 +9,7 @@ import type { EsmRequestError, PackageJson } from "unpkg-worker";
 import type { Env } from "./env.ts";
 
 const publicNpmRegistry = "https://registry.npmjs.org";
-const filesBuildCacheVersion = "2";
+const moduleCacheControl = "public, max-age=60, s-maxage=300";
 
 export async function handleRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
   let url = new URL(request.url);
@@ -42,7 +42,7 @@ export async function handleRequest(request: Request, env: Env, context: Executi
   if (url.pathname === "/run" || url.pathname === "/tsx") {
     return new Response(createInlineRunner(), {
       headers: corsHeaders({
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": moduleCacheControl,
         "Content-Type": "application/javascript; charset=utf-8",
       }),
     });
@@ -110,7 +110,7 @@ export async function handleRequest(request: Request, env: Env, context: Executi
       return redirect(new URL(typesPath).pathname, {
         status: 301,
         headers: corsHeaders({
-          "Cache-Control": "public, max-age=31536000, immutable",
+          "Cache-Control": moduleCacheControl,
         }),
       });
     }
@@ -149,7 +149,7 @@ export async function handleRequest(request: Request, env: Env, context: Executi
 
     return new Response(code, {
       headers: corsHeaders({
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": moduleCacheControl,
         "Content-Type": "application/javascript; charset=utf-8",
       }),
     });
@@ -161,7 +161,6 @@ export async function handleRequest(request: Request, env: Env, context: Executi
 
   let buildSearchParams = new URLSearchParams(searchParams);
   buildSearchParams.set("origin", normalized.url.origin);
-  buildSearchParams.set("__unpkg-build-cache", filesBuildCacheVersion);
   let buildResponse = await fetch(
     new URL(`/build/${packageName}@${version}${packagePath.filename ?? ""}${normalizeSearch(buildSearchParams)}`, env.FILES_ORIGIN)
   );
@@ -264,7 +263,6 @@ async function getBuildIntegrity(
 
   let buildSearchParams = new URLSearchParams(searchParams);
   buildSearchParams.set("origin", origin);
-  buildSearchParams.set("__unpkg-build-cache", filesBuildCacheVersion);
   let response: Response;
   try {
     response = await fetch(

@@ -2,7 +2,7 @@
 
 ## Overview
 
-`esm.unpkg.com` is an npm-only ESM transformation service for UNPKG. It serves packages from npm as browser-ready ES modules, with on-demand transformation, dependency rewriting, configurable bundling, TypeScript/JSX transforms, metadata, and cacheable immutable build artifacts.
+`esm.unpkg.com` is an npm-only ESM transformation service for UNPKG. It serves packages from npm as browser-ready ES modules, with on-demand transformation, dependency rewriting, configurable bundling, TypeScript/JSX transforms, metadata, and cacheable build artifacts.
 
 The service should strive for esm.sh compatibility for npm packages. A URL that works on esm.sh for an npm package should either work the same way on `esm.unpkg.com` or fail with a documented, intentional limitation. There are two explicit initial exclusions:
 
@@ -78,7 +78,7 @@ https://esm.unpkg.com/react@18.3.1/jsx-runtime
 https://esm.unpkg.com/@scope/pkg@1.2.3/sub/module?target=es2022&dev
 ```
 
-Requests without an explicit version range resolve using npm dist-tags and semver metadata. Requests with a range resolve to a concrete version and then redirect to an immutable versioned URL unless the response is a metadata or error response.
+Requests without an explicit version range resolve using npm dist-tags and semver metadata. Requests with a range resolve to a concrete version and then redirect to a versioned URL unless the response is a metadata or error response.
 
 Package subpaths are first-class. The service must support both package `exports` subpaths and package file paths where package exports allow or no exports map constrains them.
 
@@ -87,9 +87,9 @@ Package subpaths are first-class. The service must support both package `exports
 The service has two URL classes:
 
 - Friendly URLs, such as `/react@18`, that resolve npm metadata and redirect or proxy to a build artifact.
-- Immutable build artifact URLs, such as `/react@18.3.1/es2022/react.mjs`, that are content-addressed or option-addressed and cacheable for a long duration.
+- Versioned build artifact URLs, such as `/react@18.3.1?target=es2022`, that are option-addressed and cacheable with a bounded, revalidatable TTL.
 
-Friendly URLs should redirect to immutable build artifact URLs after version and option resolution. They should use short CDN TTLs because dist-tags and semver ranges can move. Immutable build artifacts should use long-lived cache headers.
+Friendly URLs should redirect to versioned build artifact URLs after version and option resolution. They should use short CDN TTLs because dist-tags and semver ranges can move. Build artifacts must not use `immutable` cache semantics because output also depends on the UNPKG transformer implementation.
 
 Generated modules should rewrite dependency imports to absolute `https://esm.unpkg.com/...` URLs with concrete resolved versions and normalized query options. This avoids version drift inside generated output and maximizes cache reuse.
 
@@ -98,7 +98,7 @@ All JavaScript module responses must include:
 ```txt
 Content-Type: application/javascript; charset=utf-8
 Access-Control-Allow-Origin: *
-Cache-Control: public, max-age=31536000, immutable
+Cache-Control: public, max-age=60, s-maxage=300
 ```
 
 Range, dist-tag, metadata, and error responses may use shorter cache lifetimes.
@@ -156,7 +156,7 @@ Minifies JavaScript output. Minification is part of the build cache key.
 ?sourcemap
 ```
 
-Includes source maps. The public behavior should use external immutable `.map` artifacts with the same cache semantics as the JavaScript artifact. Inline source maps are acceptable only during early local development and should not be the long-term public behavior for large packages.
+Includes source maps. The public behavior should use external `.map` artifacts with the same bounded cache semantics as the JavaScript artifact. Inline source maps are acceptable only during early local development and should not be the long-term public behavior for large packages.
 
 ### Dependency Version Overrides
 
@@ -374,7 +374,7 @@ Example:
 }
 ```
 
-Metadata responses must include the resolved concrete version, immutable module URL, declaration URL when available, supported export subpaths when known, and an SRI-compatible integrity hash for the module artifact.
+Metadata responses must include the resolved concrete version, module URL, declaration URL when available, supported export subpaths when known, and an SRI-compatible integrity hash for the module artifact.
 
 ### Web Worker Mode
 
@@ -393,7 +393,7 @@ let worker = createWorker();
 let named = createWorker({ name: "pkg-worker" });
 ```
 
-The generated worker wrapper must use an immutable module URL internally and work under standard browser module worker semantics.
+The generated worker wrapper must use the resolved versioned module URL internally and work under standard browser module worker semantics.
 
 An `inject` helper like esm.sh is deferred until after the first package-import release.
 
@@ -683,7 +683,7 @@ Tasks:
 1. Parse npm package names, scoped package names, semver ranges, dist-tags, and subpaths from `esm.unpkg.com` URLs.
 2. Normalize esm.sh-compatible query syntax, including import-map-friendly `&flag/` trailing-slash URLs.
 3. Resolve ranges and dist-tags to concrete npm versions.
-4. Implement redirects from friendly URLs to immutable artifact URLs.
+4. Implement redirects from friendly URLs to versioned artifact URLs.
 5. Implement `?meta` with package name, resolved version, subpath, target, export subpaths when known, declaration path when known, and placeholder artifact URLs.
 6. Add JSON diagnostics for invalid package specs, invalid query combinations, missing packages, and missing versions.
 
@@ -725,7 +725,7 @@ Tasks:
 2. Create a deterministic build cache key from the normalized request.
 3. Build a simple JavaScript ESM response for packages that already publish browser-compatible ESM.
 4. Rewrite bare dependency imports to `esm.unpkg.com` URLs.
-5. Persist build artifacts at origin and serve them with immutable cache headers.
+5. Persist build artifacts at origin and serve them with bounded, revalidatable cache headers.
 6. Start with Bun's built-in bundler where it can satisfy the required resolver hooks, while preserving a clean esbuild fallback path.
 
 Exit criteria:
@@ -801,7 +801,7 @@ Tasks:
 2. Serve declaration files and emit `X-TypeScript-Types` unless `?no-dts` is present.
 3. Implement `?raw` for untransformed package files.
 4. Fill out `?meta` with module URL, type URL, dependency versions, peer dependencies, build options, diagnostics, and integrity.
-5. Compute SRI-compatible hashes over immutable artifacts.
+5. Compute SRI-compatible hashes over build artifacts.
 
 Exit criteria:
 

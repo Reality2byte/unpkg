@@ -150,6 +150,7 @@ describe("handleRequest", () => {
     let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60, s-maxage=300");
     expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
     expect(response.headers.has("X-UNPKG-Build-Key")).toBe(true);
     expect(await response.text()).toContain('from "./util?target=es2022";');
@@ -202,6 +203,7 @@ describe("handleRequest", () => {
     });
     expect(response.status).toBe(301);
     expect(response.headers.get("Location")).toBe("/@types/react@18.2.0/index.d.ts");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60, s-maxage=300");
   });
 
   it("returns module worker wrappers", async () => {
@@ -213,6 +215,7 @@ describe("handleRequest", () => {
     let response = await dispatchFetch(`https://esm.unpkg.com${redirectResponse.headers.get("Location")}`);
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60, s-maxage=300");
     expect(await response.text()).toContain(
       'return new Worker("https://esm.unpkg.com/preact@10.26.4/src/component.js?target=es2022", { type: "module", ...options });'
     );
@@ -222,6 +225,7 @@ describe("handleRequest", () => {
     let response = await dispatchFetch("https://esm.unpkg.com/run");
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60, s-maxage=300");
     expect(await response.text()).toContain("export async function run");
 
     response = await dispatchFetch("https://esm.unpkg.com/tsx");
