@@ -104,6 +104,8 @@ describe("handleRequest", () => {
     expect(html).toContain('href="https://esm.unpkg.dev/react-dom@18/client"');
     expect(html).toContain(">esm.unpkg.com/preact<");
     expect(html).toContain(">esm.unpkg.com/react-dom@18/client<");
+    expect(html).toContain('href="https://github.com/unpkg"');
+    expect(html).toContain('href="https://x.com/unpkg"');
     expect(html).not.toContain("react@18/client");
     expect(html).not.toContain('href="https://esm.unpkg.com/');
   });

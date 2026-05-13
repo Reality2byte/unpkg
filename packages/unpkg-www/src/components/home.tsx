@@ -731,6 +731,18 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
           </div>
         </div>
       </main>
+
+      <footer class="mx-auto lg:max-w-screen-md px-8 pb-16 text-sm text-slate-600">
+        <p>
+          <a class="text-blue-600 hover:underline" href="https://github.com/unpkg" title="UNPKG on GitHub">
+            GitHub
+          </a>{" "}
+          ·{" "}
+          <a class="text-blue-600 hover:underline" href="https://x.com/unpkg" title="UNPKG on X">
+            X
+          </a>
+        </p>
+      </footer>
     </Fragment>
   );
 }

@@ -879,7 +879,9 @@ function createHomePage(env: Env): string {
   </main>
 
   <footer>
-    Packages are resolved from npm and served by UNPKG.
+    <a href="https://github.com/unpkg" title="UNPKG on GitHub">GitHub</a>
+    ·
+    <a href="https://x.com/unpkg" title="UNPKG on X">X</a>
   </footer>
 </body>
 </html>`;
