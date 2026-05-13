@@ -26,6 +26,14 @@ The built-in seed suite is also available as `scripts/esm-compat-corpus.seed.jso
 
 For the broader path from the current representative suite to ecosystem-scale confidence, see [`esm-unpkg-ecosystem-compatibility-plan.md`](./esm-unpkg-ecosystem-compatibility-plan.md).
 
+For browser execution smoke checks, run:
+
+```sh
+pnpm test:esm-browser -- --corpus scripts/esm-compat-corpus.seed.json --origin https://esm.sh
+```
+
+The browser smoke runner imports selected module scenarios in Chromium and records evaluation success, export names, request count, transferred bytes, and duration. Use `ESM_BROWSER_ORIGIN` or `--origin` to point it at a beta `esm.unpkg.com` deployment.
+
 ## Compatibility Matrix
 
 | Feature | Status | Notes |
