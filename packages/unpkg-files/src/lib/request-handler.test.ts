@@ -160,7 +160,7 @@ describe("handleRequest", () => {
       expect(response.headers.get("Cache-Control")).toBe("public, max-age=31536000, immutable");
       expect(response.headers.has("X-UNPKG-Build-Key")).toBe(true);
       expect(response.headers.get("X-UNPKG-Build-Input")).toBe("/src/component.js");
-      expect(await response.text()).toContain("from './util?module';");
+      expect(await response.text()).toContain("from './util?target=es2022';");
     });
 
     it("resolves package roots before building", async () => {

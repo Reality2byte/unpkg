@@ -377,7 +377,7 @@ describe("handleRequest", () => {
       expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
       expect(response.headers.has("X-UNPKG-Build-Key")).toBe(true);
-      expect(await response.text()).toContain("from './util?module';");
+      expect(await response.text()).toContain("from './util?target=es2022';");
     });
   });
 
