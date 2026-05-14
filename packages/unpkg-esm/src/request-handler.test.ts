@@ -129,6 +129,7 @@ describe("handleRequest", () => {
     expect(html).toContain('aria-label="UNPKG on GitHub"');
     expect(html).toContain('aria-label="UNPKG on X"');
     expect(html).toContain('viewBox="0 0 24 24"');
+    expect(html).toContain("footer a:focus-visible");
     expect(html).not.toContain("Packages are resolved from npm and served by UNPKG.");
     expect(html).not.toContain("Inline scripts");
     expect(html).not.toContain("https://unpkg.com/run");

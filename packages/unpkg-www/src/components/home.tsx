@@ -40,36 +40,38 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
                 <code class="text-sm hidden sm:block">{url("/:package@:version/:file")}</code>
               </p>
 
-              <table class="mt-12 w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-300">
-                    <th class="py-2 pr-4 font-semibold">Segment</th>
-                    <th class="py-2 font-semibold">Use</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-b border-slate-200">
-                    <td class="py-2 pr-4 whitespace-nowrap align-top">
-                      <code class="text-sm bg-slate-100 sm:hidden">:pkg</code>
-                      <code class="text-sm bg-slate-100 hidden sm:inline">:package</code>
-                    </td>
-                    <td class="py-2 align-top">The package name on npm.</td>
-                  </tr>
-                  <tr class="border-b border-slate-200">
-                    <td class="py-2 pr-4 whitespace-nowrap align-top">
-                      <code class="text-sm bg-slate-100 sm:hidden">:ver</code>
-                      <code class="text-sm bg-slate-100 hidden sm:inline">:version</code>
-                    </td>
-                    <td class="py-2 align-top">The package version, npm dist-tag, or semver range.</td>
-                  </tr>
-                  <tr>
-                    <td class="py-2 pr-4 whitespace-nowrap align-top">
-                      <code class="text-sm bg-slate-100">:file</code>
-                    </td>
-                    <td class="py-2 align-top">The path to a file in the package.</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="mt-12 overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-300">
+                      <th class="py-2 pr-4 font-semibold">Segment</th>
+                      <th class="py-2 font-semibold">Use</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-slate-200">
+                      <td class="py-2 pr-4 whitespace-nowrap align-top">
+                        <code class="text-sm bg-slate-100 sm:hidden">:pkg</code>
+                        <code class="text-sm bg-slate-100 hidden sm:inline">:package</code>
+                      </td>
+                      <td class="py-2 align-top">The package name on npm.</td>
+                    </tr>
+                    <tr class="border-b border-slate-200">
+                      <td class="py-2 pr-4 whitespace-nowrap align-top">
+                        <code class="text-sm bg-slate-100 sm:hidden">:ver</code>
+                        <code class="text-sm bg-slate-100 hidden sm:inline">:version</code>
+                      </td>
+                      <td class="py-2 align-top">The package version, npm dist-tag, or semver range.</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 pr-4 whitespace-nowrap align-top">
+                        <code class="text-sm bg-slate-100">:file</code>
+                      </td>
+                      <td class="py-2 align-top">The path to a file in the package.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
               <p class="mt-4">For example:</p>
 
@@ -437,46 +439,48 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
                 <code class="text-sm bg-slate-100">script</code> tags handled by <code>/run</code>:
               </p>
 
-              <table class="mt-8 w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-300">
-                    <th class="py-2 pr-4 font-semibold">Attribute</th>
-                    <th class="py-2 font-semibold">Use</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-b border-slate-200">
-                    <td class="py-2 pr-4 whitespace-nowrap">
-                      <code class="text-sm bg-slate-100">data-filename</code>
-                    </td>
-                    <td class="py-2">Names the inline file for extension inference and clearer diagnostics.</td>
-                  </tr>
-                  <tr class="border-b border-slate-200">
-                    <td class="py-2 pr-4 whitespace-nowrap">
-                      <code class="text-sm bg-slate-100">data-target</code>
-                    </td>
-                    <td class="py-2">Sets the JavaScript output target, such as <code>es2022</code>.</td>
-                  </tr>
-                  <tr class="border-b border-slate-200">
-                    <td class="py-2 pr-4 whitespace-nowrap">
-                      <code class="text-sm bg-slate-100">data-jsx</code>
-                    </td>
-                    <td class="py-2">Chooses JSX mode, such as <code>automatic</code>.</td>
-                  </tr>
-                  <tr class="border-b border-slate-200">
-                    <td class="py-2 pr-4 whitespace-nowrap">
-                      <code class="text-sm bg-slate-100">data-jsx-import-source</code>
-                    </td>
-                    <td class="py-2">Sets the JSX import source, such as <code>preact</code>.</td>
-                  </tr>
-                  <tr>
-                    <td class="py-2 pr-4 whitespace-nowrap">
-                      <code class="text-sm bg-slate-100">data-dev</code>
-                    </td>
-                    <td class="py-2">Enables development-mode JSX output.</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="mt-8 overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-300">
+                      <th class="py-2 pr-4 font-semibold">Attribute</th>
+                      <th class="py-2 font-semibold">Use</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-slate-200">
+                      <td class="py-2 pr-4 whitespace-nowrap">
+                        <code class="text-sm bg-slate-100">data-filename</code>
+                      </td>
+                      <td class="py-2">Names the inline file for extension inference and clearer diagnostics.</td>
+                    </tr>
+                    <tr class="border-b border-slate-200">
+                      <td class="py-2 pr-4 whitespace-nowrap">
+                        <code class="text-sm bg-slate-100">data-target</code>
+                      </td>
+                      <td class="py-2">Sets the JavaScript output target, such as <code>es2022</code>.</td>
+                    </tr>
+                    <tr class="border-b border-slate-200">
+                      <td class="py-2 pr-4 whitespace-nowrap">
+                        <code class="text-sm bg-slate-100">data-jsx</code>
+                      </td>
+                      <td class="py-2">Chooses JSX mode, such as <code>automatic</code>.</td>
+                    </tr>
+                    <tr class="border-b border-slate-200">
+                      <td class="py-2 pr-4 whitespace-nowrap">
+                        <code class="text-sm bg-slate-100">data-jsx-import-source</code>
+                      </td>
+                      <td class="py-2">Sets the JSX import source, such as <code>preact</code>.</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 pr-4 whitespace-nowrap">
+                        <code class="text-sm bg-slate-100">data-dev</code>
+                      </td>
+                      <td class="py-2">Enables development-mode JSX output.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             <section id="browser-modules">
@@ -553,14 +557,15 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
 
               <p class="mt-8">The following query parameters are available:</p>
 
-              <table class="mt-4 w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-300">
-                    <th class="py-2 pr-4 font-semibold">Parameter</th>
-                    <th class="py-2 font-semibold">Use</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-300">
+                      <th class="py-2 pr-4 font-semibold">Parameter</th>
+                      <th class="py-2 font-semibold">Use</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                   <tr class="border-b border-slate-200">
                     <td class="py-2 pr-4 align-top break-all">
                       <code class="text-sm bg-slate-100">?target=...</code>
@@ -701,8 +706,9 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
                       resolved module URL.
                     </td>
                   </tr>
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
 
               <p class="mt-8">
                 Stylesheet packages and stylesheet files can be loaded from the same npm URLs. Direct{" "}
@@ -880,7 +886,7 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
       <footer class="mx-auto lg:max-w-screen-md px-8 pt-8 pb-24 border-t border-slate-200 text-slate-600">
         <p class="flex items-center justify-center gap-4">
           <a
-            class="text-slate-600 hover:text-slate-950"
+            class="text-slate-600 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-500"
             href="https://github.com/unpkg"
             title="UNPKG on GitHub"
             aria-label="UNPKG on GitHub"
@@ -888,7 +894,7 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
             <GitHubIcon class="w-6 h-6" />
           </a>
           <a
-            class="text-slate-600 hover:text-slate-950"
+            class="text-slate-600 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-500"
             href="https://x.com/unpkg"
             title="UNPKG on X"
             aria-label="UNPKG on X"

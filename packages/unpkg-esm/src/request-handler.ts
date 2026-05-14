@@ -792,6 +792,11 @@ function createHomePage(env: Env): string {
     footer a:hover {
       color: #0f172a;
     }
+    footer a:focus-visible {
+      color: #0f172a;
+      outline: 2px solid #64748b;
+      outline-offset: 0.25rem;
+    }
     footer svg {
       width: 1.5rem;
       height: 1.5rem;
