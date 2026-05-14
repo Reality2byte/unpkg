@@ -40,25 +40,36 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
                 <code class="text-sm hidden sm:block">{url("/:package@:version/:file")}</code>
               </p>
 
-              <ul class="mt-12 ml-6 list-disc list-outside">
-                <li class="marker:pr-2">
-                  <span>
-                    <code class="text-sm bg-slate-100 sm:hidden">:pkg</code>
-                    <code class="text-sm bg-slate-100 hidden sm:inline">:package</code>
-                  </span>{" "}
-                  is the name of the package on npm
-                </li>
-                <li class="marker:pr-2">
-                  <span>
-                    <code class="text-sm bg-slate-100 sm:hidden">:ver</code>
-                    <code class="text-sm bg-slate-100 hidden sm:inline">:version</code>
-                  </span>{" "}
-                  is the version of the package
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">:file</code> is the path to a file in the package
-                </li>
-              </ul>
+              <table class="mt-12 w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-300">
+                    <th class="py-2 pr-4 font-semibold">Segment</th>
+                    <th class="py-2 font-semibold">Use</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 whitespace-nowrap align-top">
+                      <code class="text-sm bg-slate-100 sm:hidden">:pkg</code>
+                      <code class="text-sm bg-slate-100 hidden sm:inline">:package</code>
+                    </td>
+                    <td class="py-2 align-top">The package name on npm.</td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 whitespace-nowrap align-top">
+                      <code class="text-sm bg-slate-100 sm:hidden">:ver</code>
+                      <code class="text-sm bg-slate-100 hidden sm:inline">:version</code>
+                    </td>
+                    <td class="py-2 align-top">The package version, npm dist-tag, or semver range.</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 pr-4 whitespace-nowrap align-top">
+                      <code class="text-sm bg-slate-100">:file</code>
+                    </td>
+                    <td class="py-2 align-top">The path to a file in the package.</td>
+                  </tr>
+                </tbody>
+              </table>
 
               <p class="mt-4">For example:</p>
 
@@ -542,87 +553,156 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
 
               <p class="mt-8">The following query parameters are available:</p>
 
-              <ul class="mt-4 ml-6 list-disc list-outside">
-                <li>
-                  <code class="text-sm bg-slate-100">?target=...</code> chooses the output/runtime target. Supported
-                  values are <code class="text-sm bg-slate-100">es2015</code> through{" "}
-                  <code class="text-sm bg-slate-100">es2024</code>,{" "}
-                  <code class="text-sm bg-slate-100">esnext</code>,{" "}
-                  <code class="text-sm bg-slate-100">node</code>,{" "}
-                  <code class="text-sm bg-slate-100">deno</code>, and{" "}
-                  <code class="text-sm bg-slate-100">denonext</code>.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?dev</code> or{" "}
-                  <code class="text-sm bg-slate-100">?env=development</code> builds with development conditions and
-                  replaces <code class="text-sm bg-slate-100">process.env.NODE_ENV</code> with{" "}
-                  <code class="text-sm bg-slate-100">"development"</code>. The default is{" "}
-                  <code class="text-sm bg-slate-100">env=production</code>.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?conditions=...</code> adds custom package export conditions. You
-                  may pass a comma-separated list or repeat the parameter.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?deps=react@18.3.1,react-dom@18.3.1</code> overrides dependency
-                  versions used when rewriting imports.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?alias=react:preact/compat,react-dom:preact/compat</code> rewrites
-                  package specifiers to alternate packages or subpaths.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?external=react,react-dom</code> leaves matching dependencies as
-                  bare imports. Use <code class="text-sm bg-slate-100">?external=*</code> to externalize all
-                  dependencies, or use the shorthand <code class="text-sm bg-slate-100">/*pkg</code> form, such as{" "}
-                  <code class="text-sm bg-slate-100">https://esm.unpkg.com/*swr@2</code>.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?bundle</code> bundles package dependencies,{" "}
-                  <code class="text-sm bg-slate-100">?standalone</code> carries standalone bundling through rewritten
-                  dependency imports, and <code class="text-sm bg-slate-100">?no-bundle</code> or{" "}
-                  <code class="text-sm bg-slate-100">?bundle=false</code> disables bundling.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?jsx=automatic</code>,{" "}
-                  <code class="text-sm bg-slate-100">?jsx=react</code>, or{" "}
-                  <code class="text-sm bg-slate-100">?jsx=preact</code> selects JSX transform mode. Use{" "}
-                  <code class="text-sm bg-slate-100">?jsxImportSource=...</code> with automatic JSX runtimes.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?min</code> minifies output,{" "}
-                  <code class="text-sm bg-slate-100">?sourcemap</code> emits an inline source map,{" "}
-                  <code class="text-sm bg-slate-100">?keep-names</code> preserves function and class names, and{" "}
-                  <code class="text-sm bg-slate-100">?ignore-annotations</code> asks the bundler to ignore package
-                  tree-shaking annotations.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?no-dts</code> suppresses the{" "}
-                  <code class="text-sm bg-slate-100">X-TypeScript-Types</code> response header when declaration files
-                  are available.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?meta</code> returns JSON metadata for the resolved module,
-                  including dependency information, export subpaths, target, bundle mode, types URL, and integrity.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?raw</code> serves the raw package file without transforming it.
-                  Raw mode is for file inspection and cannot be combined with build options like{" "}
-                  <code class="text-sm bg-slate-100">?target</code>,{" "}
-                  <code class="text-sm bg-slate-100">?bundle</code>, or{" "}
-                  <code class="text-sm bg-slate-100">?min</code>.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?css</code> asks for a package stylesheet entry when the package
-                  exposes one, and <code class="text-sm bg-slate-100">?module</code> on a{" "}
-                  <code class="text-sm bg-slate-100">.css</code> file returns a constructable stylesheet module.
-                </li>
-                <li>
-                  <code class="text-sm bg-slate-100">?worker</code> returns a small module that creates a{" "}
-                  <code class="text-sm bg-slate-100">{"new Worker(url, { type: \"module\" })"}</code> for the resolved
-                  module URL.
-                </li>
-              </ul>
+              <table class="mt-4 w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-300">
+                    <th class="py-2 pr-4 font-semibold">Parameter</th>
+                    <th class="py-2 font-semibold">Use</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?target=...</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Chooses the output/runtime target. Supported values are{" "}
+                      <code class="text-sm bg-slate-100">es2015</code> through{" "}
+                      <code class="text-sm bg-slate-100">es2024</code>,{" "}
+                      <code class="text-sm bg-slate-100">esnext</code>,{" "}
+                      <code class="text-sm bg-slate-100">node</code>,{" "}
+                      <code class="text-sm bg-slate-100">deno</code>, and{" "}
+                      <code class="text-sm bg-slate-100">denonext</code>.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?dev</code>,{" "}
+                      <code class="text-sm bg-slate-100">?env=development</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Builds with development conditions and replaces{" "}
+                      <code class="text-sm bg-slate-100">process.env.NODE_ENV</code> with{" "}
+                      <code class="text-sm bg-slate-100">"development"</code>. The default is{" "}
+                      <code class="text-sm bg-slate-100">env=production</code>.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?conditions=...</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Adds custom package export conditions. You may pass a comma-separated list or repeat the
+                      parameter.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?deps=react@18.3.1,react-dom@18.3.1</code>
+                    </td>
+                    <td class="py-2 align-top">Overrides dependency versions used when rewriting imports.</td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?alias=react:preact/compat</code>
+                    </td>
+                    <td class="py-2 align-top">Rewrites package specifiers to alternate packages or subpaths.</td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?external=react,react-dom</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Leaves matching dependencies as bare imports. Use{" "}
+                      <code class="text-sm bg-slate-100">?external=*</code> to externalize all dependencies, or use the
+                      shorthand <code class="text-sm bg-slate-100">/*pkg</code> form, such as{" "}
+                      <code class="text-sm bg-slate-100">https://esm.unpkg.com/*swr@2</code>.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?bundle</code>,{" "}
+                      <code class="text-sm bg-slate-100">?standalone</code>,{" "}
+                      <code class="text-sm bg-slate-100">?no-bundle</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Controls dependency bundling. <code class="text-sm bg-slate-100">?bundle=false</code> also
+                      disables bundling.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?jsx=automatic</code>,{" "}
+                      <code class="text-sm bg-slate-100">?jsxImportSource=...</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Selects JSX transform mode. Use <code class="text-sm bg-slate-100">?jsx=react</code> or{" "}
+                      <code class="text-sm bg-slate-100">?jsx=preact</code> for classic presets.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?min</code>,{" "}
+                      <code class="text-sm bg-slate-100">?sourcemap</code>,{" "}
+                      <code class="text-sm bg-slate-100">?keep-names</code>,{" "}
+                      <code class="text-sm bg-slate-100">?ignore-annotations</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Controls output minification, inline source maps, function/class names, and tree-shaking
+                      annotations.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?no-dts</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Suppresses the <code class="text-sm bg-slate-100">X-TypeScript-Types</code> response header when
+                      declaration files are available.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?meta</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Returns JSON metadata for the resolved module, including dependencies, export subpaths, target,
+                      bundle mode, types URL, and integrity.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?raw</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Serves the raw package file without transforming it. Raw mode cannot be combined with build
+                      options like <code class="text-sm bg-slate-100">?target</code>,{" "}
+                      <code class="text-sm bg-slate-100">?bundle</code>, or{" "}
+                      <code class="text-sm bg-slate-100">?min</code>.
+                    </td>
+                  </tr>
+                  <tr class="border-b border-slate-200">
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?css</code>,{" "}
+                      <code class="text-sm bg-slate-100">?module</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Requests package stylesheet entries or returns constructable stylesheet modules for{" "}
+                      <code class="text-sm bg-slate-100">.css</code> files.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 pr-4 align-top break-all">
+                      <code class="text-sm bg-slate-100">?worker</code>
+                    </td>
+                    <td class="py-2 align-top">
+                      Returns a small module that creates a{" "}
+                      <code class="text-sm bg-slate-100">{"new Worker(url, { type: \"module\" })"}</code> for the
+                      resolved module URL.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
               <p class="mt-8">
                 Stylesheet packages and stylesheet files can be loaded from the same npm URLs. Direct{" "}
