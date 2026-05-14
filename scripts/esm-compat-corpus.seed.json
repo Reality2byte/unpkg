@@ -195,20 +195,6 @@
       "path": "/preact@10.26.4?worker"
     },
     {
-      "category": "inline-runner",
-      "description": "Inline TSX runner helper",
-      "expect": "module",
-      "features": ["tsx"],
-      "path": "/tsx"
-    },
-    {
-      "category": "inline-runner",
-      "description": "Inline run helper",
-      "expect": "module",
-      "features": ["run"],
-      "path": "/run"
-    },
-    {
       "category": "runtime-target",
       "description": "Runtime-native target",
       "expect": "module",

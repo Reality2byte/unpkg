@@ -92,6 +92,9 @@ describe("handleRequest", () => {
           return fileResponse(packageInfo.preact);
         case "https://registry.npmjs.org/react":
           return fileResponse(packageInfo.react);
+        case "https://registry.npmjs.org/run":
+        case "https://registry.npmjs.org/tsx":
+          return new Response("Not found", { status: 404 });
         case "https://registry.npmjs.org/preact/-/preact-10.26.4.tgz":
           return fileResponse(packageTarballs.preact["10.26.4"]);
         case "https://registry.npmjs.org/react/-/react-18.2.0.tgz":
@@ -121,12 +124,13 @@ describe("handleRequest", () => {
     expect(html).toContain("esm.unpkg.com is currently in beta.");
     expect(html).toContain("https://unpkg.com/#browser-modules");
     expect(html).toContain("https://esm.unpkg.com/react@18.3.1");
-    expect(html).toContain("https://esm.unpkg.com/run");
-    expect(html).toContain("https://esm.unpkg.com/tsx");
+    expect(html).toContain("https://unpkg.com/run");
     expect(html).toContain("text/tsx");
     expect(html).toContain('href="https://github.com/unpkg"');
     expect(html).toContain('href="https://x.com/unpkg"');
     expect(html).not.toContain("Packages are resolved from npm and served by UNPKG.");
+    expect(html).not.toContain("https://esm.unpkg.com/run");
+    expect(html).not.toContain("https://esm.unpkg.com/tsx");
     expect(html).toContain("hljs-listing");
     expect(html).toContain("hljs-tag");
   });
@@ -335,16 +339,24 @@ describe("handleRequest", () => {
     );
   });
 
-  it("returns inline TSX runner helper modules", async () => {
+  it("does not serve inline runner helpers from the ESM subdomain", async () => {
     let response = await dispatchFetch("https://esm.unpkg.com/run");
-    expect(response.status).toBe(200);
-    expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
-    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60, s-maxage=300");
-    expect(await response.text()).toContain("export async function run");
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "PACKAGE_NOT_FOUND",
+        message: "Package not found: run",
+      },
+    });
 
     response = await dispatchFetch("https://esm.unpkg.com/tsx");
-    expect(response.status).toBe(200);
-    expect(await response.text()).toContain('"/transform?"');
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "PACKAGE_NOT_FOUND",
+        message: "Package not found: tsx",
+      },
+    });
   });
 
   it("proxies inline transforms to the files origin", async () => {

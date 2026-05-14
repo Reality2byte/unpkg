@@ -65,6 +65,8 @@ describe("handleRequest", () => {
           return fileResponse(packageInfo.preact);
         case "https://registry.npmjs.org/react":
           return fileResponse(packageInfo.react);
+        case "https://registry.npmjs.org/run":
+          return new Response("Not found", { status: 404 });
         case "https://registry.npmjs.org/vitessce":
           return fileResponse(packageInfo.vitessce);
         case "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz":
@@ -104,12 +106,40 @@ describe("handleRequest", () => {
     expect(html).toContain('href="https://esm.unpkg.dev/"');
     expect(html).toContain('href="https://esm.unpkg.dev/preact"');
     expect(html).toContain('href="https://esm.unpkg.dev/react-dom@18/client"');
+    expect(html).toContain("https://unpkg.dev/run");
     expect(html).toContain(">esm.unpkg.com/preact<");
     expect(html).toContain(">esm.unpkg.com/react-dom@18/client<");
     expect(html).toContain('href="https://github.com/unpkg"');
     expect(html).toContain('href="https://x.com/unpkg"');
     expect(html).not.toContain("react@18/client");
     expect(html).not.toContain('href="https://esm.unpkg.com/');
+    expect(html).not.toContain("https://esm.unpkg.dev/tsx");
+  });
+
+  it("serves the inline script runner from the exact /run path", async () => {
+    let response = await dispatchFetch("https://unpkg.com/run");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/javascript; charset=utf-8");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60, s-maxage=300");
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+
+    let code = await response.text();
+    expect(code).toContain('const transformOrigin = "https://esm.unpkg.com";');
+    expect(code).toContain('"text/tsx"');
+    expect(code).toContain('new URL("/transform?" + transformSearchParams(script), transformOrigin)');
+    expect(code).toContain("export async function run");
+    expect(code).not.toContain('params.set("external"');
+  });
+
+  it("does not intercept package URLs that begin with /run", async () => {
+    let response = await dispatchFetch("https://unpkg.com/run/anything");
+    expect(response.status).toBe(404);
+    expect(await response.text()).toBe("Package not found: run");
+
+    response = await dispatchFetch("https://unpkg.com/run@1.0.0");
+    expect(response.status).toBe(404);
+    expect(await response.text()).toBe("Package not found: run");
   });
 
   describe("file requests", () => {

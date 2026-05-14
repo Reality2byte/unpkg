@@ -10,7 +10,7 @@ We should only call the service esm.sh-compatible at ecosystem scale when all of
 
 - Representative npm package corpora build successfully at agreed thresholds.
 - Generated browser modules execute in real browsers for packages where execution is meaningful to test.
-- Query options match esm.sh behavior for the supported scope: `target`, `dev`, `env`, `deps`, `alias`, `external`, `bundle=false`, `no-bundle`, `standalone`, `raw`, `conditions`, `keep-names`, `ignore-annotations`, `no-dts`, `meta`, `worker`, `/run`, and `/tsx`.
+- Query options match esm.sh behavior for the supported scope: `target`, `dev`, `env`, `deps`, `alias`, `external`, `bundle=false`, `no-bundle`, `standalone`, `raw`, `conditions`, `keep-names`, `ignore-annotations`, `no-dts`, `meta`, `worker`, and the main-domain `/run` helper.
 - Failures are classified into actionable buckets, such as resolver mismatch, CJS interop, unsupported Node API, unsupported asset, transform failure, runtime failure, timeout, or intentional exclusion.
 - Compatibility status is visible in docs and in machine-readable test output.
 - Beta observability shows stable latency, cache behavior, artifact size, and failure rates under real traffic.

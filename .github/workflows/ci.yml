@@ -63,16 +63,18 @@ jobs:
 
           (cd packages/unpkg-files && MODE=development bun --port 4000 ./src/server.ts) > /tmp/unpkg-files.log 2>&1 &
           files_pid=$!
-          (cd packages/unpkg-esm && ./node_modules/.bin/wrangler dev --env dev --port 3002 --ip 127.0.0.1) > /tmp/unpkg-esm.log 2>&1 &
+          (cd packages/unpkg-esm && ./node_modules/.bin/wrangler dev --env dev --port 3002 --inspector-port 9232 --ip 127.0.0.1) > /tmp/unpkg-esm.log 2>&1 &
           esm_pid=$!
+          (cd packages/unpkg-www && ./node_modules/.bin/wrangler dev --env dev --port 3000 --inspector-port 9230 --ip 127.0.0.1) > /tmp/unpkg-www.log 2>&1 &
+          www_pid=$!
 
           cleanup() {
-            kill "$esm_pid" "$files_pid" 2>/dev/null || true
-            wait "$esm_pid" "$files_pid" 2>/dev/null || true
+            kill "$www_pid" "$esm_pid" "$files_pid" 2>/dev/null || true
+            wait "$www_pid" "$esm_pid" "$files_pid" 2>/dev/null || true
           }
           trap cleanup EXIT
 
-          for url in http://localhost:4000/_health http://localhost:3002/_health; do
+          for url in http://localhost:4000/_health http://localhost:3002/_health http://localhost:3000/_health; do
             for attempt in {1..60}; do
               if curl --silent --fail "$url" >/dev/null; then
                 break
@@ -86,6 +88,9 @@ jobs:
                 echo "::group::unpkg-esm log"
                 cat /tmp/unpkg-esm.log || true
                 echo "::endgroup::"
+                echo "::group::unpkg-www log"
+                cat /tmp/unpkg-www.log || true
+                echo "::endgroup::"
                 exit 1
               fi
 
@@ -94,4 +99,4 @@ jobs:
           done
 
           pnpm test:esm-compat -- --corpus scripts/esm-compat-corpus.seed.json --skip-baseline --no-restart-local-services --concurrency 4
-          pnpm test:esm-browser -- --corpus scripts/esm-compat-corpus.seed.json --origin http://localhost:3002 --limit 100
+          pnpm test:esm-browser -- --corpus scripts/esm-compat-corpus.seed.json --origin http://localhost:3002 --run-origin http://localhost:3000 --limit 100

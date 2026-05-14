@@ -14,3 +14,6 @@ export { resolvePackageVersion } from "./lib/pkg-version.ts";
 
 export type { EsmPackagePath, EsmRequestError, NormalizedEsmRequest } from "./lib/esm-url.ts";
 export { getEsmPackageSubpath, normalizeEsmRequestUrl, parseEsmPackagePathname } from "./lib/esm-url.ts";
+
+export type { InlineRunnerOptions } from "./lib/inline-runner.ts";
+export { createInlineRunner } from "./lib/inline-runner.ts";

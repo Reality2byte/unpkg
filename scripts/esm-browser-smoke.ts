@@ -14,7 +14,7 @@ interface CompatCase {
 
 interface RuntimeSmokeCase {
   case: CompatCase;
-  run: (page: import("playwright").Page, origin: string) => Promise<string[]>;
+  run: (page: import("playwright").Page, origin: string, runOrigin: string) => Promise<string[]>;
 }
 
 interface CompatCorpus {
@@ -46,6 +46,7 @@ interface BrowserSmokeReport {
 
 let options = parseArgs(process.argv.slice(2));
 let origin = stripTrailingSlash(options.origin ?? process.env.ESM_BROWSER_ORIGIN ?? "https://esm.sh");
+let runOrigin = stripTrailingSlash(options.runOrigin ?? process.env.UNPKG_RUN_ORIGIN ?? origin);
 let corpus = await loadCorpus(options.corpusPath);
 let smokeCases = corpus.cases.filter((compatCase) => {
   if (compatCase.expect !== "module") return false;
@@ -140,7 +141,9 @@ async function runRuntimeCase(
   let runtimePage = await page.context().newPage();
   try {
     await runtimePage.setContent("<!doctype html><html><body></body></html>");
-    return await trackBrowserCase(runtimePage, runtimeCase.case, origin, url, () => runtimeCase.run(runtimePage, origin));
+    return await trackBrowserCase(runtimePage, runtimeCase.case, origin, url, () =>
+      runtimeCase.run(runtimePage, origin, runOrigin)
+    );
   } finally {
     await runtimePage.close();
   }
@@ -502,18 +505,25 @@ function createRuntimeSmokeCases(): RuntimeSmokeCase[] {
         features: ["runtime", "tsx"],
         path: "/__runtime/inline-tsx-helper",
       },
-      run: async (page, origin) => {
+      run: async (page, origin, runOrigin) => {
         await page.setContent([
           "<!doctype html><html><body>",
-          '<script type="text/ts">window.__esmUnpkgInlineValue = 21 as number;</script>',
+          '<div id="root"></div>',
+          '<script type="text/ts">window.__esmUnpkgInlineTsValue = 21 as number;</script>',
+          '<script type="text/tsx" data-jsx="automatic">',
+          '  import { createRoot } from "react-dom/client";',
+          '  createRoot(document.getElementById("root")!).render(<button>Inline TSX</button>);',
+          "</script>",
           "</body></html>",
         ].join(""));
         await page.addScriptTag({
           type: "module",
-          url: `${origin}/tsx`,
+          url: `${runOrigin}/run?browser-smoke=${Date.now()}`,
         });
-        await page.waitForFunction(() => globalThis.__esmUnpkgInlineValue === 21);
-        return ["tsx", "transform"];
+        await page.waitForFunction(() => {
+          return globalThis.__esmUnpkgInlineTsValue === 21 && document.getElementById("root")?.textContent === "Inline TSX";
+        });
+        return ["run", "ts", "tsx", "transform"];
       },
     },
   ];
@@ -564,6 +574,7 @@ function parseArgs(args: string[]): {
   limit: number;
   origin: string | null;
   packageName: string | null;
+  runOrigin: string | null;
 } {
   let corpusPath = "scripts/esm-compat-corpus.seed.json";
   let dryRun = false;
@@ -571,6 +582,7 @@ function parseArgs(args: string[]): {
   let limit = 10;
   let origin: string | null = null;
   let packageName: string | null = null;
+  let runOrigin: string | null = null;
 
   for (let index = 0; index < args.length; index += 1) {
     let arg = args[index];
@@ -593,6 +605,11 @@ function parseArgs(args: string[]): {
       index += 1;
     } else if (arg.startsWith("--origin=")) {
       origin = arg.slice("--origin=".length);
+    } else if (arg === "--run-origin") {
+      runOrigin = args[index + 1] ?? null;
+      index += 1;
+    } else if (arg.startsWith("--run-origin=")) {
+      runOrigin = arg.slice("--run-origin=".length);
     } else if (arg === "--package") {
       packageName = args[index + 1] ?? null;
       index += 1;
@@ -610,6 +627,7 @@ function parseArgs(args: string[]): {
     limit: Number.isFinite(limit) && limit > 0 ? limit : 10,
     origin,
     packageName,
+    runOrigin,
   };
 }
 

@@ -2,6 +2,7 @@ import type { VNode } from "preact";
 import { render } from "preact-render-to-string";
 import {
   fetchFile,
+  createInlineRunner,
   getPackageInfo,
   listFiles,
   parsePackagePathname,
@@ -17,6 +18,7 @@ import { Document } from "./components/document.tsx";
 import { Home } from "./components/home.tsx";
 
 const publicNpmRegistry = "https://registry.npmjs.org";
+const runtimeCacheControl = "public, max-age=60, s-maxage=300";
 
 export async function handleRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
   let url = new URL(request.url);
@@ -39,6 +41,20 @@ export async function handleRequest(request: Request, env: Env, context: Executi
 
   if (url.pathname === "/_health") {
     return new Response("OK");
+  }
+
+  if (url.pathname === "/run") {
+    return new Response(createInlineRunner({ transformOrigin: env.ESM_ORIGIN }), {
+      headers: {
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "*",
+        "Cache-Control": runtimeCacheControl,
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Cross-Origin-Resource-Policy": "cross-origin",
+      },
+    });
   }
 
   if (url.pathname === "/favicon.ico") {

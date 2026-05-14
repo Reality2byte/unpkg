@@ -45,7 +45,6 @@ Deferred compatibility items:
 
 - `?target=deno`, `?target=denonext`, and `?target=node`.
 - Vue and Svelte single-file component transforms.
-- `/tsx` and `/run` inline TS/JSX browser helpers.
 
 Deferred items should remain in the roadmap, but the first public package-import release should prioritize browser-target npm package imports.
 
@@ -412,20 +411,18 @@ An `inject` helper like esm.sh is deferred until after the first package-import 
 ### Inline TS/JSX Runner
 
 ```txt
-/tsx
 /run
 ```
 
-esm.sh provides a small browser helper that compiles inline `text/babel`, `text/jsx`, `text/ts`, and `text/tsx` scripts without a local build step. `esm.unpkg.com` should provide an equivalent after the package import service is stable.
+UNPKG provides a small browser helper that compiles inline `text/babel`, `text/jsx`, `text/ts`, and `text/tsx` scripts without a local build step. The helper lives on the main domain at `https://unpkg.com/run` and sends transforms through the ESM build service.
 
 Required behavior:
 
-- Load as a module script from `https://esm.unpkg.com/tsx` or `https://esm.unpkg.com/run`.
+- Load as a module script from `https://unpkg.com/run`.
 - Discover inline script tags with supported TypeScript and JSX MIME types.
 - Transform source through the same build service used for npm package transforms.
 - Respect import maps, including JSX runtime configuration.
 - Cache compiled source by content hash at the edge.
-- Avoid blocking the core package import launch if this feature is not ready, but track it as part of esm.sh compatibility rather than a permanent exclusion.
 
 ## Package Resolution
 
@@ -845,7 +842,7 @@ These items are part of the compatibility roadmap but are not required for the f
 Tasks:
 
 1. Implement `?target=deno`, `?target=denonext`, and `?target=node` with runtime-appropriate conditions and builtin handling.
-2. Implement `/tsx` and `/run` as esm.sh-compatible helper modules.
+2. Implement `https://unpkg.com/run` as the inline helper module.
 3. Compile inline `text/babel`, `text/jsx`, `text/ts`, and `text/tsx` scripts through the build service.
 4. Cache compiled source by content hash.
 5. Respect import maps and JSX runtime configuration.
@@ -855,7 +852,7 @@ Tasks:
 Exit criteria:
 
 - Deno and Node targets produce runtime-appropriate output for representative npm packages.
-- A no-build HTML page using inline TSX runs with `https://esm.unpkg.com/run`.
+- A no-build HTML page using inline TSX runs with `https://unpkg.com/run`.
 - Import-map runtime selection works for React and Preact.
 
 ### Phase 9: Compatibility Suite, Beta, and Launch

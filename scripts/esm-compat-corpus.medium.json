@@ -515,20 +515,6 @@
       "path": "/preact@10.26.4?worker"
     },
     {
-      "category": "utility-route",
-      "description": "Inline TSX runner helper",
-      "expect": "module",
-      "features": ["tsx"],
-      "path": "/tsx"
-    },
-    {
-      "category": "utility-route",
-      "description": "Inline run helper",
-      "expect": "module",
-      "features": ["run"],
-      "path": "/run"
-    },
-    {
       "category": "css",
       "description": "Normalize.css package root",
       "expect": "css",

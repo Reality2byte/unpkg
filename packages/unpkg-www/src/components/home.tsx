@@ -540,16 +540,30 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
               </ul>
 
               <p class="mt-8">
-                esm.unpkg.com also provides <code class="text-sm bg-slate-100">/run</code> and{" "}
-                <code class="text-sm bg-slate-100">/tsx</code> helper modules. These scan the page for inline scripts
-                such as <code class="text-sm bg-slate-100">text/tsx</code>, transform them through esm.unpkg.com, and
-                insert executable module scripts.
+                UNPKG also provides <code class="text-sm bg-slate-100">/run</code>, a small browser helper that scans
+                the page for inline scripts such as <code class="text-sm bg-slate-100">text/ts</code>,{" "}
+                <code class="text-sm bg-slate-100">text/jsx</code>, and{" "}
+                <code class="text-sm bg-slate-100">text/tsx</code>, transforms them through esm.unpkg.com, and inserts
+                executable module scripts.
               </p>
 
               <div class="mt-8">
                 <CodeBlock>
                   {`
-                  <script type="module" src="https://esm.unpkg.com/tsx"></script>
+                  <script type="module" src="${url("/run")}"></script>
+                  <script type="text/ts">
+                    import confetti from "canvas-confetti";
+
+                    confetti({ particleCount: 80, spread: 70 });
+                  </script>
+                `}
+                </CodeBlock>
+              </div>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  <script type="module" src="${url("/run")}"></script>
                   <script type="text/tsx" data-jsx="automatic">
                     import { createRoot } from "react-dom/client";
 
@@ -558,6 +572,15 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
                 `}
                 </CodeBlock>
               </div>
+
+              <p class="mt-8">
+                The helper supports <code class="text-sm bg-slate-100">data-filename</code>,{" "}
+                <code class="text-sm bg-slate-100">data-target</code>,{" "}
+                <code class="text-sm bg-slate-100">data-jsx</code>,{" "}
+                <code class="text-sm bg-slate-100">data-jsx-import-source</code>, and{" "}
+                <code class="text-sm bg-slate-100">data-dev</code> attributes for inline scripts that need explicit
+                transform options.
+              </p>
 
               <p class="mt-8">
                 Stylesheet packages and stylesheet files can be loaded from the same npm URLs. Direct{" "}

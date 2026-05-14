@@ -82,7 +82,7 @@ The readiness summary checks compatibility pass rate, browser smoke pass rate, p
 | Raw files | Supported | `?raw` serves files without adding transform defaults. |
 | Declaration headers | Supported | Build artifacts expose `X-TypeScript-Types` when declarations are known. |
 | Worker wrappers | Supported | `?worker` returns a module-worker factory. |
-| `/run` and `/tsx` helpers | Supported | Helper modules discover inline `text/babel`, `text/jsx`, `text/ts`, and `text/tsx` scripts and transform them through the build service. |
+| `unpkg.com/run` helper | Supported | The main UNPKG domain serves one browser helper that discovers inline `text/babel`, `text/jsx`, `text/ts`, and `text/tsx` scripts and transforms them through the ESM build service. |
 | Common browser-compatible Node builtins | Supported | `process`, `buffer`, `events`, `util`, `path`, `url`, and `stream` rewrite to JSPM browser shims for browser targets. |
 | Hard Node-only builtins in browser output | Diagnostic | `fs`, `net`, `tls`, and `child_process` return clear build diagnostics for browser targets. |
 | Vue and Svelte single-file components | Diagnostic | `.vue` and `.svelte` return `415 Unsupported Media Type` until those transforms become launch requirements. |

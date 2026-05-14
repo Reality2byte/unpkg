@@ -21,20 +21,15 @@ const homePageExample = `<script type="module">
     React.createElement("h1", null, "Hello from esm.unpkg.com")
   );
 </script>`;
-const homePageRunExample = `<script type="module" src="%%ESM_ORIGIN%%/run"></script>
-<script type="text/ts">
-  import confetti from "canvas-confetti";
-
-  confetti({ particleCount: 80, spread: 70 });
-</script>`;
-const homePageTsxExample = `<div id="root"></div>
-<script type="module" src="%%ESM_ORIGIN%%/tsx"></script>
+const homePageRunExample = `<script type="module" src="%%WWW_ORIGIN%%/run"></script>
 <script type="text/tsx" data-jsx="automatic">
   import { createRoot } from "react-dom/client";
+  import confetti from "canvas-confetti";
 
   createRoot(document.getElementById("root")!).render(
     <button>Rendered from inline TSX</button>
   );
+  confetti({ particleCount: 80, spread: 70 });
 </script>`;
 
 export async function handleRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
@@ -75,15 +70,6 @@ export async function handleRequest(request: Request, env: Env, context: Executi
         "Cache-Control": "public, max-age=60, s-maxage=300",
         "Content-Type": "text/html; charset=utf-8",
       },
-    });
-  }
-
-  if (url.pathname === "/run" || url.pathname === "/tsx") {
-    return new Response(createInlineRunner(), {
-      headers: corsHeaders({
-        "Cache-Control": moduleCacheControl,
-        "Content-Type": "application/javascript; charset=utf-8",
-      }),
     });
   }
 
@@ -640,8 +626,9 @@ function createHomePage(env: Env): string {
   let wwwOrigin = env.WWW_ORIGIN.replace(/\/+$/, "");
   let esmOrigin = env.ORIGIN.replace(/\/+$/, "");
   let exampleHtml = highlightCode(homePageExample.replaceAll("%%ESM_ORIGIN%%", esmOrigin));
-  let runExampleHtml = highlightCode(homePageRunExample.replaceAll("%%ESM_ORIGIN%%", esmOrigin));
-  let tsxExampleHtml = highlightCode(homePageTsxExample.replaceAll("%%ESM_ORIGIN%%", esmOrigin));
+  let runExampleHtml = highlightCode(
+    homePageRunExample.replaceAll("%%ESM_ORIGIN%%", esmOrigin).replaceAll("%%WWW_ORIGIN%%", wwwOrigin)
+  );
 
   return `<!DOCTYPE html>
 <html lang="en" style="background-color: white;">
@@ -856,16 +843,10 @@ function createHomePage(env: Env): string {
         <p>
           The <code>/run</code> helper scans the page for inline scripts such as <code>text/ts</code>,
           <code>text/jsx</code>, and <code>text/tsx</code>, transforms them through esm.unpkg.com, and inserts runnable
-          module scripts.
+          module scripts. Load it from the main UNPKG domain.
         </p>
 
         <div class="code-block hljs-listing"><code>${runExampleHtml}</code></div>
-
-        <p>
-          Use <code>/tsx</code> when you want the same helper behavior with inline TSX.
-        </p>
-
-        <div class="code-block hljs-listing"><code>${tsxExampleHtml}</code></div>
       </section>
 
       <section>
@@ -931,88 +912,6 @@ async function handleInlineTransformRequest(request: Request, env: Env): Promise
     statusText: sourceResponse.statusText,
     headers,
   });
-}
-
-function createInlineRunner(): string {
-  return `const supportedScriptTypes = new Set(["text/babel", "text/jsx", "text/ts", "text/tsx"]);
-
-function scriptFilename(script, index) {
-  return script.getAttribute("data-filename") || "/inline-" + index + extensionForType(script.type);
-}
-
-function extensionForType(type) {
-  if (type === "text/ts") return ".ts";
-  if (type === "text/tsx") return ".tsx";
-  if (type === "text/jsx") return ".jsx";
-  return ".js";
-}
-
-function transformSearchParams(script) {
-  let params = new URLSearchParams();
-  params.set("target", script.getAttribute("data-target") || "es2022");
-  params.set("external", "*");
-
-  let type = script.type;
-  if (type === "text/jsx" || type === "text/tsx" || type === "text/babel") {
-    params.set("jsx", script.getAttribute("data-jsx") || "automatic");
-  }
-  if (script.hasAttribute("data-jsx-import-source")) {
-    params.set("jsxImportSource", script.getAttribute("data-jsx-import-source"));
-  }
-  if (script.hasAttribute("data-dev")) {
-    params.set("env", "development");
-  }
-
-  return params;
-}
-
-async function transformScript(script, index) {
-  let filename = scriptFilename(script, index);
-  let response = await fetch(new URL("/transform?" + transformSearchParams(script), import.meta.url), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      filename,
-      source: script.textContent || ""
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(await response.text());
-  }
-
-  return response.text();
-}
-
-export async function run(root = document) {
-  let scripts = Array.from(root.querySelectorAll("script[type]")).filter((script) => {
-    return supportedScriptTypes.has(script.type) && !script.hasAttribute("data-esm-unpkg-ran");
-  });
-
-  for (let index = 0; index < scripts.length; index += 1) {
-    let script = scripts[index];
-    script.setAttribute("data-esm-unpkg-ran", "");
-
-    let moduleScript = document.createElement("script");
-    moduleScript.type = "module";
-    if (script.nonce) {
-      moduleScript.nonce = script.nonce;
-    }
-    moduleScript.textContent = await transformScript(script, index);
-    script.after(moduleScript);
-  }
-}
-
-export default run;
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => run(), { once: true });
-  } else {
-    run();
-  }
-}
-`;
 }
 
 function base64Encode(bytes: Uint8Array): string {
