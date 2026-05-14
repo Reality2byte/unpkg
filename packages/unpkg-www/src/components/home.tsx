@@ -422,12 +422,12 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
               </div>
 
               <p class="mt-8">
-                The helper supports <code class="text-sm bg-slate-100">data-filename</code>,{" "}
+                The helper reads <code class="text-sm bg-slate-100">data-filename</code>,{" "}
                 <code class="text-sm bg-slate-100">data-target</code>,{" "}
                 <code class="text-sm bg-slate-100">data-jsx</code>,{" "}
                 <code class="text-sm bg-slate-100">data-jsx-import-source</code>, and{" "}
-                <code class="text-sm bg-slate-100">data-dev</code> attributes for inline scripts that need explicit
-                transform options.
+                <code class="text-sm bg-slate-100">data-dev</code> attributes when an inline script needs explicit
+                filename, JavaScript target, JSX, or development-mode settings.
               </p>
             </section>
 
