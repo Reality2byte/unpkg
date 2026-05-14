@@ -8,6 +8,7 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
   let navItems = {
     overview: "Overview",
     "nobuild-apps": "Nobuild Apps",
+    "inline-scripts": "Inline Scripts",
     "browser-modules": "Browser Modules",
     "metadata-api": "Metadata API",
     "cache-performance": "Cache Performance",
@@ -383,6 +384,53 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
               </p>
             </section>
 
+            <section id="inline-scripts">
+              <SectionHeading id="inline-scripts">Inline Scripts</SectionHeading>
+
+              <p class="mt-4">
+                UNPKG provides <code class="text-sm bg-slate-100">/run</code>, a small browser helper that scans the
+                page for inline scripts such as <code class="text-sm bg-slate-100">text/ts</code>,{" "}
+                <code class="text-sm bg-slate-100">text/jsx</code>, and{" "}
+                <code class="text-sm bg-slate-100">text/tsx</code>, transforms them through esm.unpkg.com, and inserts
+                executable module scripts.
+              </p>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  <script type="module" src="${url("/run")}"></script>
+                  <script type="text/ts">
+                    import confetti from "canvas-confetti";
+
+                    confetti({ particleCount: 80, spread: 70 });
+                  </script>
+                `}
+                </CodeBlock>
+              </div>
+
+              <div class="mt-8">
+                <CodeBlock>
+                  {`
+                  <script type="module" src="${url("/run")}"></script>
+                  <script type="text/tsx" data-jsx="automatic">
+                    import { createRoot } from "react-dom/client";
+
+                    createRoot(document.getElementById("root")).render(<h1>Hello!</h1>);
+                  </script>
+                `}
+                </CodeBlock>
+              </div>
+
+              <p class="mt-8">
+                The helper supports <code class="text-sm bg-slate-100">data-filename</code>,{" "}
+                <code class="text-sm bg-slate-100">data-target</code>,{" "}
+                <code class="text-sm bg-slate-100">data-jsx</code>,{" "}
+                <code class="text-sm bg-slate-100">data-jsx-import-source</code>, and{" "}
+                <code class="text-sm bg-slate-100">data-dev</code> attributes for inline scripts that need explicit
+                transform options.
+              </p>
+            </section>
+
             <section id="browser-modules">
               <SectionHeading id="browser-modules">Browser Modules</SectionHeading>
 
@@ -538,49 +586,6 @@ export function Home({ esmOrigin, origin }: { esmOrigin: string; origin: string 
                   module URL.
                 </li>
               </ul>
-
-              <p class="mt-8">
-                UNPKG also provides <code class="text-sm bg-slate-100">/run</code>, a small browser helper that scans
-                the page for inline scripts such as <code class="text-sm bg-slate-100">text/ts</code>,{" "}
-                <code class="text-sm bg-slate-100">text/jsx</code>, and{" "}
-                <code class="text-sm bg-slate-100">text/tsx</code>, transforms them through esm.unpkg.com, and inserts
-                executable module scripts.
-              </p>
-
-              <div class="mt-8">
-                <CodeBlock>
-                  {`
-                  <script type="module" src="${url("/run")}"></script>
-                  <script type="text/ts">
-                    import confetti from "canvas-confetti";
-
-                    confetti({ particleCount: 80, spread: 70 });
-                  </script>
-                `}
-                </CodeBlock>
-              </div>
-
-              <div class="mt-8">
-                <CodeBlock>
-                  {`
-                  <script type="module" src="${url("/run")}"></script>
-                  <script type="text/tsx" data-jsx="automatic">
-                    import { createRoot } from "react-dom/client";
-
-                    createRoot(document.getElementById("root")).render(<h1>Hello!</h1>);
-                  </script>
-                `}
-                </CodeBlock>
-              </div>
-
-              <p class="mt-8">
-                The helper supports <code class="text-sm bg-slate-100">data-filename</code>,{" "}
-                <code class="text-sm bg-slate-100">data-target</code>,{" "}
-                <code class="text-sm bg-slate-100">data-jsx</code>,{" "}
-                <code class="text-sm bg-slate-100">data-jsx-import-source</code>, and{" "}
-                <code class="text-sm bg-slate-100">data-dev</code> attributes for inline scripts that need explicit
-                transform options.
-              </p>
 
               <p class="mt-8">
                 Stylesheet packages and stylesheet files can be loaded from the same npm URLs. Direct{" "}

@@ -107,6 +107,9 @@ describe("handleRequest", () => {
     expect(html).toContain('href="https://esm.unpkg.dev/preact"');
     expect(html).toContain('href="https://esm.unpkg.dev/react-dom@18/client"');
     expect(html).toContain("https://unpkg.dev/run");
+    expect(html).toContain('section id="inline-scripts"');
+    expect(html).toContain('href="#inline-scripts"');
+    expect(html).toContain(">Inline Scripts<");
     expect(html).toContain(">esm.unpkg.com/preact<");
     expect(html).toContain(">esm.unpkg.com/react-dom@18/client<");
     expect(html).toContain('href="https://github.com/unpkg"');
