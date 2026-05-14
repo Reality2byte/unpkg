@@ -124,11 +124,12 @@ describe("handleRequest", () => {
     expect(html).toContain("esm.unpkg.com is currently in beta.");
     expect(html).toContain("https://unpkg.com/#browser-modules");
     expect(html).toContain("https://esm.unpkg.com/react@18.3.1");
-    expect(html).toContain("https://unpkg.com/run");
-    expect(html).toContain("text/tsx");
     expect(html).toContain('href="https://github.com/unpkg"');
     expect(html).toContain('href="https://x.com/unpkg"');
     expect(html).not.toContain("Packages are resolved from npm and served by UNPKG.");
+    expect(html).not.toContain("Inline scripts");
+    expect(html).not.toContain("https://unpkg.com/run");
+    expect(html).not.toContain("text/tsx");
     expect(html).not.toContain("https://esm.unpkg.com/run");
     expect(html).not.toContain("https://esm.unpkg.com/tsx");
     expect(html).toContain("hljs-listing");

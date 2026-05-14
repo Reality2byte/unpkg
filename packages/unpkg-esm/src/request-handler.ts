@@ -21,16 +21,6 @@ const homePageExample = `<script type="module">
     React.createElement("h1", null, "Hello from esm.unpkg.com")
   );
 </script>`;
-const homePageRunExample = `<script type="module" src="%%WWW_ORIGIN%%/run"></script>
-<script type="text/tsx" data-jsx="automatic">
-  import { createRoot } from "react-dom/client";
-  import confetti from "canvas-confetti";
-
-  createRoot(document.getElementById("root")!).render(
-    <button>Rendered from inline TSX</button>
-  );
-  confetti({ particleCount: 80, spread: 70 });
-</script>`;
 
 export async function handleRequest(request: Request, env: Env, context: ExecutionContext): Promise<Response> {
   let url = new URL(request.url);
@@ -626,9 +616,6 @@ function createHomePage(env: Env): string {
   let wwwOrigin = env.WWW_ORIGIN.replace(/\/+$/, "");
   let esmOrigin = env.ORIGIN.replace(/\/+$/, "");
   let exampleHtml = highlightCode(homePageExample.replaceAll("%%ESM_ORIGIN%%", esmOrigin));
-  let runExampleHtml = highlightCode(
-    homePageRunExample.replaceAll("%%ESM_ORIGIN%%", esmOrigin).replaceAll("%%WWW_ORIGIN%%", wwwOrigin)
-  );
 
   return `<!DOCTYPE html>
 <html lang="en" style="background-color: white;">
@@ -836,17 +823,6 @@ function createHomePage(env: Env): string {
           <li>Add <code>?bundle</code>, <code>?standalone</code>, or <code>?no-bundle</code> to control bundling.</li>
           <li>Add <code>?meta</code> to inspect resolved module metadata.</li>
         </ul>
-      </section>
-
-      <section>
-        <h2>Inline scripts</h2>
-        <p>
-          The <code>/run</code> helper scans the page for inline scripts such as <code>text/ts</code>,
-          <code>text/jsx</code>, and <code>text/tsx</code>, transforms them through esm.unpkg.com, and inserts runnable
-          module scripts. Load it from the main UNPKG domain.
-        </p>
-
-        <div class="code-block hljs-listing"><code>${runExampleHtml}</code></div>
       </section>
 
       <section>
