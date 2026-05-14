@@ -35,6 +35,14 @@ This repository powers UNPKG, a CDN and web app for serving npm package files di
   - `pnpm --filter unpkg-esm dev` for the ESM Worker on port 3002.
   - `pnpm --filter unpkg-files dev` for the Bun file server on port 4000.
 
+## Deployment Notes
+
+- Deploy workers with their package scripts, for example `pnpm --filter unpkg-www deploy` or `pnpm --filter unpkg-esm deploy`.
+- Deploy staging workers with `pnpm --filter <package> deploy:staging`.
+- `unpkg-www` and `unpkg-app` have asset build steps wired into their package scripts and Wrangler configs; use those scripts so HTML/CSS/JS asset changes are built before deployment.
+- `unpkg-esm` serves its beta HTML page directly from the Worker bundle and does not have a separate static asset build.
+- Worker deploy scripts load local secrets through `scripts/with-local-env.sh`; keep Cloudflare tokens in `.env.local`.
+
 ## ESM Compatibility Tools
 
 - Run the seed compatibility suite with `pnpm test:esm-compat`.
