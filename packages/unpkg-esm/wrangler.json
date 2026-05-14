@@ -1,6 +1,7 @@
 {
   "compatibility_date": "2024-12-05",
   "main": "./src/worker.ts",
+  "assets": { "directory": "./public" },
 
   "name": "unpkg-esm",
   "observability": { "enabled": true, "head_sampling_rate": 0.001 },

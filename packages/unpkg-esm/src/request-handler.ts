@@ -649,6 +649,7 @@ function createHomePage(env: Env): string {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Browser-ready npm package imports from UNPKG.">
+  <link rel="icon" type="image/jpeg" href="/favicon.jpg">
   <title>UNPKG ESM</title>
   <style>
     * { box-sizing: border-box; }
